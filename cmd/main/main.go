@@ -1,12 +1,39 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v3"
+	"fmt"
+	"log"
+
 	"github.com/BookBits/bookbits-editor/internal/helpers"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/logger"
 )
 
 func main() {
+	//Setup Logging
+	logW, closeFunc, err := helpers.SetupLogger()
+
+	if err != nil {
+		return ;
+	}
+	defer closeFunc()
+
+	// Create the fiber app
 	app := fiber.New()
+
+	// Connect Logger
+	app.Use(logger.New(logger.Config{Output: logW}))
+
+	//Fetch Environment Variables
+	vars, err := helpers.SetupEnvVars()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	//Setup Handlers
 	helpers.SetupHandlers(app)
-	app.Listen(":8080")
+
+	//Start Server
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", vars.Port)))
 }
