@@ -40,7 +40,7 @@ func main() {
 	}
 
 	//Setup AppState
-	app.Use(models.WithAppState(db))
+	app.Use(models.WithAppState(db, vars))
 
 	//Setup Handlers
 	helpers.SetupHandlers(app)

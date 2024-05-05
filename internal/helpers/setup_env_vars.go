@@ -56,6 +56,12 @@ func SetupEnvVars() (models.EnvVars, error) {
 		return models.EnvVars{}, errors.New("Missing Env Var")
 	}
 
+	jwt_secret_key := os.Getenv("JWT_SECRET_KEY")
+	if jwt_secret_key == "" {
+		log.Fatal("JWT_SECRET_KEY not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
 	return models.EnvVars{
 		Port: port,
 		DbPort: db_port,
@@ -63,5 +69,6 @@ func SetupEnvVars() (models.EnvVars, error) {
 		DbUser: db_user,
 		DbPassword: db_password,
 		DbName: db_name,
+		JWTSecretKey: []byte(jwt_secret_key),
 	}, nil
 }

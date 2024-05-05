@@ -1,8 +1,9 @@
 package helpers
 
 import (
-	"github.com/gofiber/fiber/v3"
 	"github.com/BookBits/bookbits-editor/internal/handlers"
+	"github.com/BookBits/bookbits-editor/internal/middlewares"
+	"github.com/gofiber/fiber/v3"
 )
 
 func SetupHandlers(app *fiber.App) {
@@ -11,4 +12,6 @@ func SetupHandlers(app *fiber.App) {
 	app.Get("/test", handlers.TestPage)
 	app.Post("/test/increment", handlers.TestIncrement)
 	app.Get("/check_db", handlers.CheckDB)
+
+	app.Get("/", handlers.IndexPage, middlewares.AuthMiddleware)
 }

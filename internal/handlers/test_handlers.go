@@ -21,7 +21,7 @@ func TestIncrement(c fiber.Ctx) error {
 }
 
 func CheckDB(c fiber.Ctx) error {
-	state := c.Locals("state").(models.AppState)
+	state := c.Locals("state").(*models.AppState)
 	db := state.DB
 
 	var health int;

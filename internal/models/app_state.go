@@ -7,12 +7,14 @@ import (
 
 type AppState struct {
 	DB *gorm.DB
+	Vars EnvVars
+	User User
 }
 
-func WithAppState(db *gorm.DB) func (c fiber.Ctx) error {
-	state := AppState{DB: db}
+func WithAppState(db *gorm.DB, vars EnvVars) func (c fiber.Ctx) error {
+	state := AppState{DB: db, Vars: vars, User: User{}}
 	return func (c fiber.Ctx) error {
-		c.Locals("state", state)
+		c.Locals("state", &state)
 		return c.Next()
 	}
 }

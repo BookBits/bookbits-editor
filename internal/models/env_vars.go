@@ -7,4 +7,5 @@ type EnvVars struct {
 	DbUser string
 	DbPassword string
 	DbName string
+	JWTSecretKey []byte
 }
