@@ -14,4 +14,6 @@ func SetupHandlers(app *fiber.App) {
 	app.Get("/check_db", handlers.CheckDB)
 
 	app.Get("/", handlers.IndexPage, middlewares.AuthMiddleware)
+	app.Get("/login", handlers.LoginPage)
+	app.Post("/login", handlers.Login)
 }
