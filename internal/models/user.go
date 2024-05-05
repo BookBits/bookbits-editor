@@ -5,19 +5,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type AdminUser struct{}
-type WriterUser struct{}
+type Admin struct{}
+type Writer struct{}
+type Reviewer struct{}
 
 type UserType interface{
 	UserTypeToString() string
 }
 
-func (admin AdminUser) UserTypeToString() string {
+func (admin Admin) UserTypeToString() string {
 	return "admin"
 }
 
-func (writer WriterUser) UserTypeToSting() string {
+func (writer Writer) UserTypeToSting() string {
 	return "writer"
+}
+
+func (reviewer Reviewer) UserTypeToSting() string {
+	return "reviewer"
 }
 
 type User struct {
