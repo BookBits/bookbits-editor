@@ -10,4 +10,5 @@ func SetupHandlers(app *fiber.App) {
 	
 	app.Get("/test", handlers.TestPage)
 	app.Post("/test/increment", handlers.TestIncrement)
+	app.Get("/check_db", handlers.CheckDB)
 }

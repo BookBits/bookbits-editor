@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/BookBits/bookbits-editor/internal/helpers"
+	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 )
@@ -32,11 +33,14 @@ func main() {
 	}
 
 	//setup DB
-	_, dbErr := helpers.SetupDB(vars)
+	db, dbErr := helpers.SetupDB(vars)
 	if dbErr != nil {
 		log.Fatal(dbErr)
 		return
 	}
+
+	//Setup AppState
+	app.Use(models.WithAppState(db))
 
 	//Setup Handlers
 	helpers.SetupHandlers(app)
