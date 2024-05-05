@@ -31,6 +31,13 @@ func main() {
 		return
 	}
 
+	//setup DB
+	_, dbErr := helpers.SetupDB(vars)
+	if dbErr != nil {
+		log.Fatal(dbErr)
+		return
+	}
+
 	//Setup Handlers
 	helpers.SetupHandlers(app)
 

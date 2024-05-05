@@ -14,8 +14,9 @@ func SetupLogger() (io.Writer, func () error, error) {
 		return nil, nil, err
 	}
 
-	logMW := io.MultiWriter(os.Stdout, logFile)
+	logMW := io.MultiWriter(logFile, os.Stdout)
 	log.SetOutput(logMW)
+	log.SetFlags(log.LstdFlags|log.Lmsgprefix)
 	
 	return logMW, logFile.Close, nil
 }

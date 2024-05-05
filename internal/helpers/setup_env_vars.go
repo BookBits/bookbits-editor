@@ -12,7 +12,7 @@ import (
 func SetupEnvVars() (models.EnvVars, error) {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 		return models.EnvVars{}, err
 	}
 
