@@ -11,6 +11,7 @@ import (
 )
 
 func IndexPage(c fiber.Ctx) error {
+	c.Set("HX-Redirect", "/app")
 	return renderer.RenderTempl(c, views.IndexPage())
 }
 
@@ -38,12 +39,12 @@ func Login(c fiber.Ctx) error {
 
 	validateErr := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password))
 	if validateErr != nil {
-		return c.SendStatus(fiber.ErrUnauthorized.Code)
+		return c.Status(401).SendString("Invalid Password")
 	}
 
 	accessToken, refreshToken, err := user.GenerateTokens(state.Vars)
 	if err != nil {
-		return c.SendStatus(500)
+		return c.Status(500).SendString("Server Error")
 	}
 
 	c.Cookie(&fiber.Cookie{

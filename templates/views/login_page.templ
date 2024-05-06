@@ -10,12 +10,24 @@ templ LoginPage() {
 		<script src="/bundle.js" defer></script>
 		<script src="/login-bundle.js"></script>
 	</head>
-	<body>
+	<body x-data="{}" hx-get="/" hx-trigger="login-successful" 
+	@htmx:config-request="loginBundle.configureRedirect($event)">
 		<div class="w-full h-screen flex flex-col justify-center items-center" x-data="{}">
 			<div class="flex flex-col items-center max-w-sm bg-white border rounded-lg shadow-sm p-12 border-neutral-200/60 w-[60%]">
 			    <h5 class="text-2xl font-medium leading-none tracking-tight text-neutral-900">Log In to your Account</h5>
 				<p x-ref="loginErrMsg" class="text-sm font-light text-red-400 mt-4"></p>
-				<form @htmx:response-error.window="$refs.loginErrMsg.innerHTML = loginBundle.handleLoginError($event.detail.xhr)" id="login-form" class="mt-8 flex flex-col space-y-5 w-full p-0" hx-post="/login" hx-target="this" hx-swap="none">
+				<form @htmx:before-send="
+				$refs.loginBtn.innerHTML='Logging In...'
+				$refs.loginBtn.disabled = true
+				" 
+				@htmx:before-on-load="
+				$refs.loginBtn.innerHTML='Log Me In'
+				$refs.loginBtn.disabled = false
+				"
+				@htmx:after-on-load="
+					loginBundle.setupTokens($event.detail.xhr)
+				"
+				@htmx:response-error.window="$refs.loginErrMsg.innerHTML = loginBundle.handleLoginError($event.detail.xhr)" id="login-form" class="mt-8 flex flex-col space-y-5 w-full p-0" hx-post="/login" hx-target="this" hx-swap="none">
 				<div class="w-full max-w-xs mx-auto">
 					<input name="user-email" type="email" placeholder="Email Address" 
 					onkeyup="this.setCustomValidity('')"
@@ -34,7 +46,7 @@ templ LoginPage() {
 					}"
 					class="flex w-full h-10 px-3 py-6 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50" />
 				</div>
-				<button type="submit" class="inline-flex w-full items-center justify-center px-4 py-3 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
+				<button x-ref="loginBtn" type="submit" class="inline-flex w-full items-center justify-center px-4 py-3 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-neutral-300 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
 					Log Me In
 				</button>
 				</form>

@@ -22,7 +22,7 @@ func SetupEnvVars() (models.EnvVars, error) {
 		return models.EnvVars{}, errors.New("Missing Env Var")
 	}
 
-		db_port := os.Getenv("DB_PORT")
+	db_port := os.Getenv("DB_PORT")
 	if db_port == "" {
 		log.Fatal("DB_PORT not provided")
 		return models.EnvVars{}, errors.New("Missing Env Var")
@@ -62,6 +62,18 @@ func SetupEnvVars() (models.EnvVars, error) {
 		return models.EnvVars{}, errors.New("Missing Env Var")
 	}
 
+	default_admin_user_email := os.Getenv("DEFAULT_ADMIN_USER_EMAIL")
+	if default_admin_user_email == "" {
+		log.Fatal("DEFAULT_ADMIN_USER_EMAIL not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
+	default_admin_user_password := os.Getenv("DEFAULT_ADMIN_USER_PASSWORD")
+	if default_admin_user_password == "" {
+		log.Fatal("DEFAULT_ADMIN_USER_PASSWORD not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
 	return models.EnvVars{
 		Port: port,
 		DbPort: db_port,
@@ -70,5 +82,7 @@ func SetupEnvVars() (models.EnvVars, error) {
 		DbPassword: db_password,
 		DbName: db_name,
 		JWTSecretKey: []byte(jwt_secret_key),
+		DefaultAdminUserEmail: default_admin_user_email,
+		DefaultAdminPassword: default_admin_user_password,
 	}, nil
 }

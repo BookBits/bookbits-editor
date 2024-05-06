@@ -24,5 +24,11 @@ func SetupDB(vars models.EnvVars) (*gorm.DB, error) {
 		return nil, err
 	}
 
+	_, adminUserErr := models.GetUserByEmail(vars.DefaultAdminUserEmail, db)
+	if adminUserErr != nil {
+		models.CreateUserWithPassword("admin", vars.DefaultAdminUserEmail, vars.DefaultAdminPassword, models.UserTypeAdmin, db)
+		log.Fatal("Created Admin User")
+	}
+
 	return db, nil
 }

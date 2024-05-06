@@ -7,35 +7,24 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type Admin struct{}
-type Writer struct{}
-type Reviewer struct{}
+type UserType string
 
-type UserType interface{
-	UserTypeToString() string
-}
-
-func (admin Admin) UserTypeToString() string {
-	return "admin"
-}
-
-func (writer Writer) UserTypeToString() string {
-	return "writer"
-}
-
-func (reviewer Reviewer) UserTypeToSting() string {
-	return "reviewer"
-}
+const (
+  UserTypeAdmin   UserType = "admin"
+  UserTypeReviewer UserType = "reviewer"
+  UserTypeWriter  UserType = "writer"
+)
 
 type User struct {
 	gorm.Model
 
-	ID uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	ID uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;"`
 	Username string `json:"username"`
-	Email string `json:"email"`
+	Email string `json:"email" gorm:"unique"`
 	PasswordHash []byte `json:"-"`
 	Type UserType `json:"user_type"`
 }
@@ -49,6 +38,30 @@ func GetUserByID(id uuid.UUID, db *gorm.DB) (User, error) {
 	var user User;
 	err := db.First(&user, id).Error
 	return user, err
+}
+
+func GetUserByEmail(email string, db *gorm.DB) (User, error) {
+	var user User
+	err := db.Where("email = ?", email).Find(&user).Error
+	return user, err
+}
+
+func CreateUserWithPassword(username string, email string, password string, user_type UserType, db *gorm.DB) error {
+	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		return err
+	}
+
+	user := User{
+		ID: uuid.New(),
+		Username: username,
+		Email: email,
+		PasswordHash: hasedPassword,
+		Type: user_type,
+	}
+
+	createErr := db.Create(&user).Error
+	return createErr
 }
 
 type UserClaims struct {

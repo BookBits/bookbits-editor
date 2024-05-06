@@ -7,6 +7,7 @@ import (
 
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/log"
 )
 
 func tryRefresh(c fiber.Ctx) (models.User, string, string, error) {
@@ -38,9 +39,9 @@ func tryRefresh(c fiber.Ctx) (models.User, string, string, error) {
 
 func AuthMiddleware(c fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
+	log.Info(authHeader)
 
 	if authHeader == "" {
-		c.ClearCookie()
 		return c.Redirect().To("/login")
 	}
 
