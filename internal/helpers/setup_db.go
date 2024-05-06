@@ -19,7 +19,7 @@ func SetupDB(vars models.EnvVars) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	migrateErr := db.AutoMigrate()
+	migrateErr := db.AutoMigrate(&models.User{})
 	if migrateErr != nil {
 		return nil, err
 	}

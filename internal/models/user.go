@@ -36,7 +36,7 @@ type User struct {
 	ID uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
 	Username string `json:"username"`
 	Email string `json:"email"`
-	PasswordHash string `json:"-"`
+	PasswordHash []byte `json:"-"`
 	Type UserType `json:"user_type"`
 }
 
