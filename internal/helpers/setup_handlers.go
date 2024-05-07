@@ -7,7 +7,7 @@ import (
 )
 
 func SetupHandlers(app *fiber.App) {
-	app.Static("/", "./public/")
+	app.Static("/static", "./public/")
 	
 	app.Get("/test", handlers.TestPage)
 	app.Post("/test/increment", handlers.TestIncrement)

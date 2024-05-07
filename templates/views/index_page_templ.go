@@ -10,7 +10,9 @@ import "context"
 import "io"
 import "bytes"
 
-func IndexPage() templ.Component {
+import "fmt"
+
+func IndexPage(csrf_token string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -23,7 +25,21 @@ func IndexPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>BookBits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/bundle-main.js\"></script><script src=\"/bundle-packages.js\"></script></head><body hx-get=\"/\" hx-trigger=\"session-setup\" hx-swap=\"none\" x-data=\"{}\"><div hx-post=\"/refresh\" hx-swap=\"none\" hx-trigger=\"load\" @htmx:after-on-load=\"mainBundle.setupSession($event.detail.xhr)\"></div></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>BookBits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/static/bundle-main.js\"></script><script src=\"/static/bundle-packages.js\" defer></script></head><body hx-get=\"/\" hx-trigger=\"session-setup\" hx-swap=\"none\" x-data=\"{}\"><div hx-post=\"/refresh\" hx-swap=\"none\" hx-trigger=\"load\" @htmx:after-on-load=\"mainBundle.setupSession($event.detail.xhr)\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrf_token))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/index_page.templ`, Line: 18, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

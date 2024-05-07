@@ -1,17 +1,23 @@
 package views
 
-templ IndexPage() {
+import "fmt"
+
+templ IndexPage(csrf_token string) {
 <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<title>BookBits Editor</title>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<script src="/bundle-main.js"></script>
-		<script src="/bundle-packages.js"></script>
+		<script src="/static/bundle-main.js"></script>
+		<script src="/static/bundle-packages.js" defer></script>
 	</head>
 	<body hx-get="/" hx-trigger="session-setup" hx-swap="none" x-data="{}">
-		<div hx-post="/refresh" hx-swap="none" hx-trigger="load" @htmx:after-on-load="mainBundle.setupSession($event.detail.xhr)"></div>
+		<div hx-post="/refresh" hx-swap="none" hx-trigger="load" @htmx:after-on-load="mainBundle.setupSession($event.detail.xhr)"
+		hx-headers={
+		fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrf_token)
+		}
+		></div>
 	</body>
 </html>
 }

@@ -1,13 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
+	"time"
 
 	"github.com/BookBits/bookbits-editor/internal/helpers"
 	"github.com/BookBits/bookbits-editor/internal/models"
+	"github.com/gofiber/fiber/v3/log"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/csrf"
 	"github.com/gofiber/fiber/v3/middleware/logger"
+	"github.com/gofiber/utils/v2"
 )
 
 func main() {
@@ -41,6 +45,26 @@ func main() {
 
 	//Setup AppState
 	app.Use(models.WithAppState(db, vars))
+	
+	app.Use(csrf.New(csrf.Config{
+		KeyLookup: "header:X-CSRF-Token",
+		CookieName: "csrf_",
+		CookieSameSite: "Strict",
+		CookieHTTPOnly: true,
+		CookieSessionOnly: true,
+		Expiration: time.Hour * 1,
+		KeyGenerator: utils.UUIDv4,
+		Extractor: func(c fiber.Ctx) (string, error) {
+			token := c.Get("X-CSRF-Token")
+			cookie := c.Cookies("csrf_")
+			log.Info(cookie)
+			log.Info(token)
+			if token == "" {
+				return token, errors.New("No token")
+			}
+			return token, nil
+		},
+	}))
 
 	//Setup Handlers
 	helpers.SetupHandlers(app)

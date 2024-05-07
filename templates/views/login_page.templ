@@ -1,14 +1,16 @@
 package views
 
-templ LoginPage() {
+import "fmt"
+
+templ LoginPage(csrf_token string) {
 <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<title>Login | BookBits Editor</title>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<script src="/bundle-main.js" defer></script>
-		<script src="/bundle-packages.js" defer></script>
+		<script src="/static/bundle-main.js"></script>
+		<script src="/static/bundle-packages.js" defer></script>
 	</head>
 	<body x-data="{}" hx-get="/" hx-trigger="session-setup">
 		<div class="w-full h-screen flex flex-col justify-center items-center" x-data="{}">
@@ -26,7 +28,11 @@ templ LoginPage() {
 				@htmx:after-on-load="
 					mainBundle.setupSession($event.detail.xhr)
 				"
-				@htmx:response-error.window="$refs.loginErrMsg.innerHTML = mainBundle.handleLoginError($event.detail.xhr)" id="login-form" class="mt-8 flex flex-col space-y-5 w-full p-0" hx-post="/login" hx-target="this" hx-swap="none">
+				@htmx:response-error.window="$refs.loginErrMsg.innerHTML = mainBundle.handleLoginError($event.detail.xhr)" id="login-form" class="mt-8 flex flex-col space-y-5 w-full p-0" hx-post="/login" hx-target="this" hx-swap="none"
+				hx-headers={
+					fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrf_token)
+				}
+				>
 				<div class="w-full max-w-xs mx-auto">
 					<input name="user-email" type="email" placeholder="Email Address" 
 					onkeyup="this.setCustomValidity('')"

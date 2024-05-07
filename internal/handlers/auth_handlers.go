@@ -7,9 +7,20 @@ import (
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/BookBits/bookbits-editor/templates/views"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/csrf"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type csrfRes struct {
+	CsrfToken string `json:"csrfToken"`
+}
+
+func GetCSRF(c fiber.Ctx) error {
+	token := csrf.TokenFromContext(c)
+	res := csrfRes{CsrfToken: token}
+	return c.JSON(res)
+}
 
 func RefreshSession(c fiber.Ctx) error {
 	state := c.Locals("state").(*models.AppState)
@@ -69,7 +80,8 @@ func IndexHandler(c fiber.Ctx) error {
 	user := state.User
 
 	if user.ID == uuid.Nil {
-		return renderer.RenderTempl(c, views.IndexPage())
+		token := csrf.TokenFromContext(c)
+		return renderer.RenderTempl(c, views.IndexPage(token))
 	}
 
 	hxReq := c.Get("HX-Request")
@@ -83,7 +95,8 @@ func IndexHandler(c fiber.Ctx) error {
 }
 
 func LoginPageHandler(c fiber.Ctx) error {
-	return renderer.RenderTempl(c, views.LoginPage())
+	token := csrf.TokenFromContext(c)
+	return renderer.RenderTempl(c, views.LoginPage(token))
 }
 
 type loginResponse struct {
