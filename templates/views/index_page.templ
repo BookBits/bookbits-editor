@@ -7,9 +7,9 @@ templ IndexPage() {
 		<title>BookBits Editor</title>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<script src="/bundle.js" defer></script>
+		<script src="/bundle.js"></script>
 	</head>
-	<body hx-get="/" hx-trigger="tokens-setup" hx-swap="none" @htmx:config-request="mainBundle.loadAuth($event)" x-data="{}">
+	<body hx-get="/" hx-trigger="tokens-setup" hx-swap="none" x-data="{}">
 		<div hx-post="/refresh" hx-swap="none" hx-trigger="load" @htmx:after-on-load="mainBundle.successfulRefresh($event.detail.xhr)"></div>
 	</body>
 </html>

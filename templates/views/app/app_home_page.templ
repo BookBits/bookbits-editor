@@ -1,0 +1,18 @@
+package app
+
+import "github.com/BookBits/bookbits-editor/internal/models"
+
+templ AppHomePage(user models.User) {
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Dashboard | Bookbits Editor</title>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<script src="/bundle.js" defer></script>
+	</head>
+	<body>
+		<p>Welcome, {user.Username}</p>
+	</body>
+</html>
+}

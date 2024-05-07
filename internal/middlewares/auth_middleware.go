@@ -1,30 +1,20 @@
 package middlewares
 
 import (
-	"strings"
 
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/google/uuid"
 )
 
 func AuthMiddleware(c fiber.Ctx) error {
 	state := c.Locals("state").(*models.AppState)
-	authHeader := c.Get("Authorization")
+	accessToken := c.Cookies("accessToken")
 
-	if authHeader == "" {
+	if accessToken == "" {
 		state.User = models.User{}
 		return c.Next()	
 	}
-
-	parts := strings.Split(authHeader, " ")
-
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-		c.Set("Authorization", "")
-		c.ClearCookie()
-		return c.Redirect().To("/login")
-	}
-
-	accessToken := parts[1]
 
 	claims, err := models.ValidateToken(accessToken, state.Vars.JWTSecretKey)
 
@@ -39,5 +29,15 @@ func AuthMiddleware(c fiber.Ctx) error {
 	}
 
 	state.User = user
+	return c.Next()
+}
+
+func AuthOnlyRoute(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+
+	if state.User.ID == uuid.Nil {
+		return c.SendStatus(401)
+	}
+
 	return c.Next()
 }

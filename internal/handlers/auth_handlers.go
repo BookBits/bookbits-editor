@@ -6,6 +6,7 @@ import (
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/BookBits/bookbits-editor/templates/views"
+	"github.com/gofiber/fiber/v3/log"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -45,29 +46,42 @@ func RefreshSession(c fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
 		Name: "refreshToken",
 		Value: refreshToken,
-		Secure: true,
 		SameSite: "Strict",
 		Expires: time.Now().Add(time.Hour * 24 * 7),
 		HTTPOnly: true,
 	})
-
-	response := loginResponse{
-		AccessToken: accessToken,
-		ExpiresAt: time.Now().Add(time.Minute * 2),
+	
+	c.Cookie(&fiber.Cookie{
+		Name: "accessToken",
+		Value: accessToken,
+		SameSite: "Strict",
+		HTTPOnly: true,
+		Expires: time.Now().Add(time.Hour),
+	})
+	
+	loginResponse := loginResponse{
+		ExpiresAt: time.Now().Add(time.Second * 120),
 	}
-	return c.Status(200).JSON(&response)
+	return c.JSON(loginResponse)
 }
 
 func IndexHandler(c fiber.Ctx) error {
+	log.Info("Get /")
 	state := c.Locals("state").(*models.AppState)
 	user := state.User
+	log.Info(user.ID)
 
 	if user.ID == uuid.Nil {
 		return renderer.RenderTempl(c, views.IndexPage())
 	}
-
-	c.Set("HX-Redirect", "/app")
-	return c.SendStatus(200)
+	hxReq := c.Get("HX-Request")
+	
+	if hxReq == "true" {
+		c.Set("HX-Redirect", "/app")
+		return c.SendStatus(200)
+	} else {
+		return c.Redirect().To("/app")
+	}
 }
 
 func LoginPageHandler(c fiber.Ctx) error {
@@ -75,7 +89,6 @@ func LoginPageHandler(c fiber.Ctx) error {
 }
 
 type loginResponse struct {
-	AccessToken string `json:"accessToken"`
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
@@ -107,14 +120,19 @@ func Login(c fiber.Ctx) error {
 		Value: refreshToken,
 		SameSite: "Strict",
 		HTTPOnly: true,
-		Secure: true,
 		Expires: time.Now().Add(time.Hour * 24 * 7),
 	})
 
+	c.Cookie(&fiber.Cookie{
+		Name: "accessToken",
+		Value: accessToken,
+		SameSite: "Strict",
+		HTTPOnly: true,
+		Expires: time.Now().Add(time.Hour),
+	})
+	
 	loginResponse := loginResponse{
-		AccessToken: accessToken,
 		ExpiresAt: time.Now().Add(time.Second * 120),
 	}
-
 	return c.JSON(loginResponse)
 }
