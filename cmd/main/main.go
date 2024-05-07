@@ -56,9 +56,6 @@ func main() {
 		KeyGenerator: utils.UUIDv4,
 		Extractor: func(c fiber.Ctx) (string, error) {
 			token := c.Get("X-CSRF-Token")
-			cookie := c.Cookies("csrf_")
-			log.Info(cookie)
-			log.Info(token)
 			if token == "" {
 				return token, errors.New("No token")
 			}
