@@ -6,7 +6,6 @@ import (
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/BookBits/bookbits-editor/templates/views"
-	"github.com/gofiber/fiber/v3/log"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -60,28 +59,27 @@ func RefreshSession(c fiber.Ctx) error {
 	})
 	
 	loginResponse := loginResponse{
-		ExpiresAt: time.Now().Add(time.Second * 120),
+		ExpiresAt: time.Now().Add(time.Hour),
 	}
 	return c.JSON(loginResponse)
 }
 
 func IndexHandler(c fiber.Ctx) error {
-	log.Info("Get /")
 	state := c.Locals("state").(*models.AppState)
 	user := state.User
-	log.Info(user.ID)
 
 	if user.ID == uuid.Nil {
 		return renderer.RenderTempl(c, views.IndexPage())
 	}
+
 	hxReq := c.Get("HX-Request")
 	
 	if hxReq == "true" {
 		c.Set("HX-Redirect", "/app")
 		return c.SendStatus(200)
-	} else {
-		return c.Redirect().To("/app")
 	}
+
+	return c.Redirect().To("/app")
 }
 
 func LoginPageHandler(c fiber.Ctx) error {
@@ -132,7 +130,7 @@ func Login(c fiber.Ctx) error {
 	})
 	
 	loginResponse := loginResponse{
-		ExpiresAt: time.Now().Add(time.Second * 120),
+		ExpiresAt: time.Now().Add(time.Hour),
 	}
 	return c.JSON(loginResponse)
 }

@@ -8,27 +8,33 @@ const production = !process.env.ROLLUP_WATCH;
 export default [{
 	input: './static/main.js',
 	output: {
-		file: './public/bundle.js',
+		file: './public/bundle-main.js',
 		format: 'iife',
 		name: 'mainBundle',
 		exports: 'named'
 	},
 	plugins: [
 		resolve(),
-		commonjs(),
-		postcss(),
 		production && terser() // minify, but only in production
 	]
 }, {
-		input: './static/login.js',
+		input: './static/app.js',
 		output: {
-			file: './public/login-bundle.js',
+			file: './public/bundle-app.js',
 			format: 'iife',
-			name: 'loginBundle',
-			exports: 'named'
+			name: 'appBundle',
+			exports: 'named',
+		},
+}, {
+		input: './static/packages.js',
+		output: {
+			file: './public/bundle-packages.js',
+			format: 'iife',
 		},
 		plugins: [
 			resolve(),
+			commonjs(),
+			postcss(),
 			production && terser() // minify, but only in production
 		]
 	}];

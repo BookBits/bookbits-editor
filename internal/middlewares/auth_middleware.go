@@ -36,7 +36,7 @@ func AuthOnlyRoute(c fiber.Ctx) error {
 	state := c.Locals("state").(*models.AppState)
 
 	if state.User.ID == uuid.Nil {
-		return c.SendStatus(401)
+		return c.Redirect().To("/")
 	}
 
 	return c.Next()
