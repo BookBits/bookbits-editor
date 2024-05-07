@@ -23,7 +23,7 @@ func IndexPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>BookBits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/bundle.js\"></script></head><body><div></div></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>BookBits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/bundle.js\" defer></script></head><body hx-get=\"/\" hx-trigger=\"tokens-setup\" hx-swap=\"none\" @htmx:config-request=\"mainBundle.loadAuth($event)\" x-data=\"{}\"><div hx-post=\"/refresh\" hx-swap=\"none\" hx-trigger=\"load\" @htmx:after-on-load=\"mainBundle.successfulRefresh($event.detail.xhr)\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

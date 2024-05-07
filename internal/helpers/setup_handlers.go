@@ -13,7 +13,8 @@ func SetupHandlers(app *fiber.App) {
 	app.Post("/test/increment", handlers.TestIncrement)
 	app.Get("/check_db", handlers.CheckDB)
 
-	app.Get("/", handlers.IndexPage, middlewares.AuthMiddleware)
-	app.Get("/login", handlers.LoginPage)
+	app.Get("/", handlers.IndexHandler, middlewares.AuthMiddleware)
+	app.Post("/refresh", handlers.RefreshSession)
+	app.Get("/login", handlers.LoginPageHandler)
 	app.Post("/login", handlers.Login)
 }
