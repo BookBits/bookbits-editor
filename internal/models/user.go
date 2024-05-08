@@ -1,6 +1,7 @@
 package models
 
 import (
+	"crypto/rand"
 	"errors"
 	"log"
 	"time"
@@ -26,6 +27,7 @@ type User struct {
 	Username string `json:"username"`
 	Email string `json:"email" gorm:"unique"`
 	PasswordHash []byte `json:"-"`
+	PasswordSalt []byte `json:"-"`
 	Type UserType `json:"user_type"`
 }
 
@@ -47,7 +49,12 @@ func GetUserByEmail(email string, db *gorm.DB) (User, error) {
 }
 
 func CreateUserWithPassword(username string, email string, password string, user_type UserType, db *gorm.DB) error {
-	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	salt := make([]byte, 16)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return err
+	}
+	hasedPassword, err := bcrypt.GenerateFromPassword(append(salt, []byte(password)...), 12)
 	if err != nil {
 		return err
 	}
@@ -57,11 +64,16 @@ func CreateUserWithPassword(username string, email string, password string, user
 		Username: username,
 		Email: email,
 		PasswordHash: hasedPassword,
+		PasswordSalt: salt,
 		Type: user_type,
 	}
 
 	createErr := db.Create(&user).Error
 	return createErr
+}
+
+func (user User) Validate(password string) error {
+	return bcrypt.CompareHashAndPassword(user.PasswordHash, append(user.PasswordSalt, []byte(password)...))
 }
 
 type UserClaims struct {

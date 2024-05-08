@@ -9,7 +9,6 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/csrf"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type csrfRes struct {
@@ -116,7 +115,7 @@ func Login(c fiber.Ctx) error {
 		return c.Status(422).SendString("Invalid Email Address")
 	}
 
-	validateErr := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password))
+	validateErr := user.Validate(password)
 	if validateErr != nil {
 		return c.Status(401).SendString("Invalid Password")
 	}
