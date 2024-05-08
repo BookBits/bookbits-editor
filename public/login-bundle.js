@@ -1,0 +1,1 @@
+var loginBundle=function(e){"use strict";return e.handleLoginError=function(e){return e.responseText},e.setupTokens=function(e){if(200===e.status)try{const t=JSON.parse(e.responseText).expires_at;sessionStorage.setItem("expiresAt",t);const s=new CustomEvent("login-successful");document.body.dispatchEvent(s)}catch(e){}},e}({});

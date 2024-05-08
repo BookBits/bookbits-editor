@@ -1,0 +1,1 @@
+var mainBundle=function(e){"use strict";return e.handleLoginError=function(e){return e.responseText},e.setupSession=function(e){if(200===e.status)try{const t=JSON.parse(e.responseText).expires_at;sessionStorage.setItem("expiresAt",t);const s=new CustomEvent("session-setup");document.body.dispatchEvent(s)}catch(e){}},e}({});

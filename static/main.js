@@ -1,8 +1,18 @@
-import htmx from "htmx.org"
-import Alpine from "alpinejs"
-import "./main.css"
+export function setupSession(xhr) {
+	if (xhr.status === 200) {
+		try {
+			const tokensResponse = JSON.parse(xhr.responseText)
+			const expiresAt = tokensResponse.expires_at
 
-window.htmx = htmx
-window.Alpine = Alpine
+			sessionStorage.setItem('expiresAt', expiresAt)
+			const redirectEvent = new CustomEvent('session-setup')
+			document.body.dispatchEvent(redirectEvent)
+		} catch(error) {
+			// parse failed
+		}
+	}
+}
 
-Alpine.start()
+export function handleLoginError(xhr) {
+	return xhr.responseText
+}
