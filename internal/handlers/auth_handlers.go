@@ -146,3 +146,11 @@ func Login(c fiber.Ctx) error {
 	}
 	return c.JSON(loginResponse)
 }
+
+func Logout(c fiber.Ctx) error {
+	c.ClearCookie("accessToken")
+	c.ClearCookie("refreshToken")
+
+	c.Set("HX-Redirect", "/")
+	return c.SendStatus(200)
+}

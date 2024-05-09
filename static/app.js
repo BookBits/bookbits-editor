@@ -22,3 +22,7 @@ function setupSessionRefresh() {
 }
 
 setupSessionRefresh()
+
+export function logout() {
+	sessionStorage.clear()
+}

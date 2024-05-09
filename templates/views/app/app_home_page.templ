@@ -1,8 +1,12 @@
 package app
 
-import "github.com/BookBits/bookbits-editor/internal/models"
+import (
+	"fmt"
 
-templ UserDropdownMenu(user models.User) {
+	"github.com/BookBits/bookbits-editor/internal/models"
+)
+
+templ UserDropdownMenu(user models.User, csrfToken string) {
 <div x-data="{
         dropdownOpen: false
     }"
@@ -13,7 +17,7 @@ templ UserDropdownMenu(user models.User) {
             <span>Welcome, {user.Username}</span>
             <span class="text-xs font-light text-neutral-400">{user.Email}</span>
         </span>
-        <svg class="absolute right-0 w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" /></svg>          
+		<i data-lucide="chevron-down" class="absolute right-0 w-5 h-5 mr-3"></i>
     </button>
 
     <div x-show="dropdownOpen" 
@@ -37,7 +41,11 @@ templ UserDropdownMenu(user models.User) {
             </button>
 			}
             <div class="h-px my-1 -mx-1 bg-neutral-200"></div>
-            <button class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+            <button hx-post="/logout" hx-swap="none"
+			hx-headers={
+				fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+			}
+			@htmx:before-on-load="appBundle.logout()" class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
 				<i data-lucide="log-out" class="h-4 w-4 text-neutral-500"></i>
                 <span>Log out</span>
             </button>
@@ -46,7 +54,7 @@ templ UserDropdownMenu(user models.User) {
 </div>
 }
 
-templ AppHomePage(user models.User) {
+templ AppHomePage(user models.User, csrfToken string) {
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -68,7 +76,7 @@ templ AppHomePage(user models.User) {
 			</div>
 		  </div>
 		  <div class="flex items-center mr-4">
-			@UserDropdownMenu(user)
+			@UserDropdownMenu(user, csrfToken)
 		  </div>
 		</header>
 	</body>

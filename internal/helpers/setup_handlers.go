@@ -17,6 +17,7 @@ func SetupHandlers(app *fiber.App) {
 	app.Post("/refresh", handlers.RefreshSession)
 	app.Get("/login", handlers.LoginPageHandler)
 	app.Post("/login", handlers.Login)
+	app.Post("/logout", handlers.Logout)
 
 	app.Get("/app", handlers.AppHomeHandler, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 }

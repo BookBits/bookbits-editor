@@ -1,4 +1,4 @@
-(function () {
+var appBundle = (function (exports) {
 	'use strict';
 
 	function refreshTokens() {
@@ -26,4 +26,12 @@
 
 	setupSessionRefresh();
 
-})();
+	function logout() {
+		sessionStorage.clear();
+	}
+
+	exports.logout = logout;
+
+	return exports;
+
+})({});
