@@ -1,7 +1,7 @@
 import Alpine from "alpinejs"
 import htmx from "htmx.org"
 import "./main.css"
-import { createIcons, Search, UserRound, LogOut, Wrench, ChevronDown } from "lucide"
+import { createIcons, Search, UserRound, LogOut, Wrench, ChevronDown, X, Plus } from "lucide"
 
 window.Alpine = Alpine
 window.htmx = htmx
@@ -12,5 +12,7 @@ createIcons({icons: {
 	UserRound,
 	Wrench,
 	LogOut,
-	ChevronDown
+	ChevronDown,
+	X,
+	Plus
 }})

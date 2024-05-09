@@ -20,6 +20,18 @@ const (
   UserTypeWriter  UserType = "writer"
 )
 
+func (ut UserType) ToString() string {
+	switch ut {
+	case UserTypeAdmin:
+		return "Admin"
+	case UserTypeReviewer:
+		return "Reviewer"
+	case UserTypeWriter:
+		return "Writer"
+	}
+	return ""
+}
+
 type User struct {
 	gorm.Model
 
@@ -46,6 +58,12 @@ func GetUserByEmail(email string, db *gorm.DB) (User, error) {
 	var user User
 	err := db.Where("email = ?", email).Find(&user).Error
 	return user, err
+}
+
+func GetUsers(db *gorm.DB) ([]User, error) {
+	var users []User
+	err := db.Find(&users).Error
+	return users, err
 }
 
 func CreateUserWithPassword(username string, email string, password string, user_type UserType, db *gorm.DB) error {
