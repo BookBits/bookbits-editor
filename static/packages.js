@@ -14,5 +14,5 @@ createIcons({icons: {
 	LogOut,
 	ChevronDown,
 	X,
-	Plus
+	Plus,
 }})

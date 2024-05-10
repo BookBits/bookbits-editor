@@ -1,8 +1,26 @@
 import { SessionResponse } from "./types/SessionResponse"
 
-function refreshTokens() {
-	fetch("/refresh", {
-		method: 'POST'
+interface CsrfTokenResponse {
+	csrfToken: string
+}
+
+export async function getCSRFToken(): Promise<string> {
+	let csrfToken: string|undefined = await fetch("/csrf").then((res) => {
+		if (res.status === 200) {
+			return res.json().then((body: CsrfTokenResponse) => {
+				return body.csrfToken
+			})
+		}
+	})
+	return csrfToken!
+}
+
+async function refreshTokens() {
+	await fetch("/refresh", {
+		method: 'POST',
+		headers: {
+			"X-CSRF-Token": await getCSRFToken()
+		}
 	}).then((res) => {
 		if (res.status === 200) {
 			res.json().then((contents: SessionResponse) => {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/BookBits/bookbits-editor/internal/models"
+	"github.com/BookBits/bookbits-editor/templates/components"
 )
 
 templ UserDropdownMenu(user models.User, csrfToken string) {
@@ -40,9 +41,8 @@ templ UserDropdownMenu(user models.User, csrfToken string) {
 				<i data-lucide="wrench" class="h-4 w-4 text-neutral-500"></i>
                 <span>Manage Users</span>
             </button>
-			@UserManagementModal()
+			@UserManagementModal(csrfToken)
 			}
-            <div class="h-px my-1 -mx-1 bg-neutral-200"></div>
             <button hx-post="/logout" hx-swap="none"
 			hx-headers={
 				fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
@@ -66,7 +66,22 @@ templ AppHomePage(user models.User, csrfToken string) {
 		<script src="/static/bundle-packages.js" defer></script>
 		<script src="/static/bundle-app.js"></script>
 	</head>
-	<body>
+	<body x-data="{}"
+	x-init="
+	window.toast = function(message, options = {}){
+                let description = '';
+                let type = 'default';
+                let position = 'top-center';
+                let html = '';
+                if(typeof options.description != 'undefined') description = options.description;
+                if(typeof options.type != 'undefined') type = options.type;
+                if(typeof options.position != 'undefined') position = options.position;
+                if(typeof options.html != 'undefined') html = options.html;
+                
+                window.dispatchEvent(new CustomEvent('toast-show', { detail : { type: type, message: message, description: description, position : position, html: html }}));
+            }
+	">
+		@components.Toasts()
 		<header class="bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen">
 		  <div class="flex items-center ml-4">
 		    <a href="/app" class="text-lg font-bold"><span class="text-blue-600">BookBits</span> Editor</a>

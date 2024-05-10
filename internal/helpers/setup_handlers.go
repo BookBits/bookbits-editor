@@ -15,10 +15,12 @@ func SetupHandlers(app *fiber.App) {
 
 	app.Get("/", handlers.IndexHandler, middlewares.AuthMiddleware)
 	app.Post("/refresh", handlers.RefreshSession)
+	app.Get("/csrf", handlers.GetCSRF)
 	app.Get("/login", handlers.LoginPageHandler)
 	app.Post("/login", handlers.Login)
 	app.Post("/logout", handlers.Logout)
 
 	app.Get("/app", handlers.AppHomeHandler, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Get("/users", handlers.GetUsers, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
+	app.Post("/users", handlers.RegisterUser, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 }

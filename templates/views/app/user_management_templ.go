@@ -13,7 +13,7 @@ import "bytes"
 import "github.com/BookBits/bookbits-editor/internal/models"
 import "fmt"
 
-func UserTile(user models.User) templ.Component {
+func userTypeSelector() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -26,17 +26,87 @@ func UserTile(user models.User) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n    radioGroupSelectedValue: &#39;writer&#39;,\n    radioGroupOptions: [\n        {\n            title: &#39;Admin&#39;,\n            value: &#39;admin&#39;\n        },\n        {\n            title: &#39;Reviewer&#39;,\n            value: &#39;reviewer&#39;\n        },\n        {\n            title: &#39;Writer&#39;,\n            value: &#39;writer&#39;\n        }\n    ]\n}\" class=\"space-y-3\"><template x-for=\"(option, index) in radioGroupOptions\" :key=\"index\"><label @click=\"radioGroupSelectedValue=option.value\" class=\"flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full\"><input type=\"radio\" name=\"user-type\" :value=\"option.value\" :checked=\"radioGroupSelectedValue==option.value\" class=\"text-gray-900 translate-y-px focus:ring-gray-700\"> <span class=\"relative flex flex-col text-left space-y-1.5 leading-none text-sm\"><span x-text=\"option.title\" class=\"\"></span></span></label></template></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func AddUser(csrfToken string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n        popoverOpen: false,\n        popoverArrow: true,\n        popoverPosition: &#39;bottom&#39;,\n        popoverHeight: 0,\n        popoverOffset: 8,\n        popoverHeightCalculate() {\n            this.$refs.popover.classList.add(&#39;invisible&#39;); \n            this.popoverOpen=true; \n            let that=this;\n            $nextTick(function(){ \n                that.popoverHeight = that.$refs.popover.offsetHeight;\n                that.popoverOpen=false; \n                that.$refs.popover.classList.remove(&#39;invisible&#39;);\n                that.$refs.popoverInner.setAttribute(&#39;x-transition&#39;, &#39;&#39;);\n                that.popoverPositionCalculate();\n            });\n        },\n        popoverPositionCalculate(){\n            if(window.innerHeight &lt; (this.$refs.popoverButton.getBoundingClientRect().top + this.$refs.popoverButton.offsetHeight + this.popoverOffset + this.popoverHeight)){\n                this.popoverPosition = &#39;top&#39;;\n            } else {\n                this.popoverPosition = &#39;bottom&#39;;\n            }\n        }\n    }\" x-init=\"\n        that = this;\n        window.addEventListener(&#39;resize&#39;, function(){\n            popoverPositionCalculate();\n        });\n        $watch(&#39;popoverOpen&#39;, function(value){\n            if(value){ popoverPositionCalculate(); document.getElementById(&#39;width&#39;).focus();  }\n        });\n    \" class=\"relative\"><button type=\"button\" x-ref=\"popoverButton\" @click=\"popoverOpen=!popoverOpen\" class=\"h-10 flex flex-row items-center justify-center px-4 py-4 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none\"><i data-lucide=\"plus\"></i> <span>New User</span></button><div x-ref=\"popover\" x-show=\"popoverOpen\" x-init=\"setTimeout(function(){ popoverHeightCalculate(); }, 100);\" x-trap.inert=\"popoverOpen\" @click.away=\"popoverOpen=false;\" @keydown.escape.window=\"popoverOpen=false\" :class=\"{ &#39;top-0 mt-12&#39; : popoverPosition == &#39;bottom&#39;, &#39;bottom-0 mb-12&#39; : popoverPosition == &#39;top&#39; }\" class=\"absolute w-[300px] max-w-xl h-[400px] -translate-x-1/2 left-1/2 overflow-scroll\" x-cloak><div x-ref=\"popoverInner\" x-show=\"popoverOpen\" class=\"w-full p-4 bg-white border rounded-md shadow-sm border-neutral-200/70\"><div x-show=\"popoverArrow &amp;&amp; popoverPosition == &#39;bottom&#39;\" class=\"absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2\"><div class=\"w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-sm\"></div></div><div x-show=\"popoverArrow  &amp;&amp; popoverPosition == &#39;top&#39;\" class=\"absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2\"><div class=\"w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-sm\"></div></div><div class=\"grid gap-4\"><div class=\"space-y-2\"><h4 class=\"font-medium leading-none\">Create New User</h4><p class=\"text-sm text-muted-foreground\">Enter details of the new user.</p></div><form class=\"flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2\" hx-post=\"/users\" hx-target=\"this\" hx-swap=\"none\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 93, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:response-error.window=\"$refs.addUserErrMsg.innerHTML=$event.detail.xhr.responseText\" @htmx:after-on-load=\"window.toast(&#39;User Added Successfully&#39;, {\n                        position: &#39;top-right&#39;,\n                        type: &#39;success&#39;\n                }); popoverOpen=false\"><p x-ref=\"addUserErrMsg\" class=\"text-sm font-light text-red-400\"></p><div class=\"grid gap-x-2 gap-y-4\"><div class=\"grid items-center grid-cols-3 gap-4\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"username\">Username</label><input onkeyup=\"this.setCustomValidity(&#39;&#39;)\" hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;Username cannot be empty&#39;)\n                    }\" class=\"flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"username\" id=\"username\" placeholder=\"New Username\" type=\"text\"></div><div class=\"grid items-center grid-cols-3 gap-4\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"user-email\">Email</label><input hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;Email cannot be empty&#39;)\n                    }\" class=\"flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"user-email\" id=\"user-email\" placeholder=\"Email Address\" type=\"email\"></div><div class=\"grid items-center grid-cols-3 gap-4\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"password\">Password</label><input hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;Password cannot be empty&#39;)\n                    }\" class=\"flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"user-password\" id=\"password\" placeholder=\"New Password\" type=\"password\"></div><div class=\"grid items-start grid-cols-3 gap-4\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\">Type</label>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = userTypeSelector().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"flex flex-row w-full justify-end items-center mt-6 space-x-2\"><button @click=\"popoverOpen=false\" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-red-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-red-100 bg-red-50 hover:text-red-600 hover:bg-red-100\">Cancel</button> <button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-green-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-green-100 bg-green-50 hover:text-green-600 hover:bg-green-100\">Save</button></div></form></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func UserTile(user models.User) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li x-show=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("userSearchToken == '' || '%s'.toLowerCase().startsWith(userSearchToken.toLowerCase())", user.Username))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 8, Col: 123}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 140, Col: 123}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,12 +114,12 @@ func UserTile(user models.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 12, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 144, Col: 67}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,12 +127,12 @@ func UserTile(user models.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 13, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 145, Col: 61}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,12 +140,12 @@ func UserTile(user models.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Type.ToString())
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(user.Type.ToString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 14, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 146, Col: 71}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -98,9 +168,9 @@ func UserList(users []models.User) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<ul id=\"users-list\" class=\"max-h-[600px] overflow-y-scroll\">")
@@ -124,7 +194,7 @@ func UserList(users []models.User) templ.Component {
 	})
 }
 
-func UserManagementModal() templ.Component {
+func UserManagementModal(csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -132,12 +202,20 @@ func UserManagementModal() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<template x-teleport=\"body\"><div x-show=\"modalOpen\" class=\"fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen\" x-cloak><div x-show=\"modalOpen\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"modalOpen=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40\"></div><div x-show=\"modalOpen\" x-trap.inert.noscroll=\"modalOpen\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Manage Users</h3><button @click=\"modalOpen=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\" hx-get=\"/users\" hx-target=\"#users-list\" hx-swap=\"outerHTML\" hx-trigger=\"load\"><div class=\"flex flex-col space-y-2 mt-2\" x-data=\"{userSearchToken: &#39;&#39;}\"><div class=\"flex flex-row justify-between items-center space-x-1.5\"><div class=\"w-[75%] mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search Users\" x-model=\"userSearchToken\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div><button type=\"button\" class=\"w-[25%] h-10 inline-flex items-center justify-center space-x-1 px-4 py-4 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-700 focus:shadow-outline focus:outline-none\"><i data-lucide=\"plus\"></i> <span>New User</span></button></div><ul id=\"users-list\"></ul></div></div></div></div></template>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<template x-teleport=\"body\"><div x-show=\"modalOpen\" class=\"fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"modalOpen\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"modalOpen=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"modalOpen\" x-trap.inert.noscroll=\"modalOpen\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Manage Users</h3><button @click=\"modalOpen=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\" hx-get=\"/users\" hx-target=\"#users-list\" hx-swap=\"outerHTML\" hx-trigger=\"load\"><div class=\"flex flex-col space-y-2 mt-2\" x-data=\"{userSearchToken: &#39;&#39;}\"><div class=\"flex flex-row justify-between items-center space-x-1.5\"><div class=\"w-[75%] mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search Users\" x-model=\"userSearchToken\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AddUser(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><ul id=\"users-list\"></ul></div></div></div></div></template>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -14,6 +14,7 @@ import (
 	"fmt"
 
 	"github.com/BookBits/bookbits-editor/internal/models"
+	"github.com/BookBits/bookbits-editor/templates/components"
 )
 
 func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
@@ -36,7 +37,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 18, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 19, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -49,7 +50,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 19, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 20, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -64,12 +65,12 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = UserManagementModal().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = UserManagementModal(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-px my-1 -mx-1 bg-neutral-200\"></div><button hx-post=\"/logout\" hx-swap=\"none\" hx-headers=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-post=\"/logout\" hx-swap=\"none\" hx-headers=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -107,7 +108,15 @@ func AppHomePage(user models.User, csrfToken string) templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Dashboard | Bookbits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script></head><body><header class=\"bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen\"><div class=\"flex items-center ml-4\"><a href=\"/app\" class=\"text-lg font-bold\"><span class=\"text-blue-600\">BookBits</span> Editor</a></div><div class=\"flex items-center w-[30%]\"><div class=\"w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div></div><div class=\"flex items-center mr-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Dashboard | Bookbits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script></head><body x-data=\"{}\" x-init=\"\n	window.toast = function(message, options = {}){\n                let description = &#39;&#39;;\n                let type = &#39;default&#39;;\n                let position = &#39;top-center&#39;;\n                let html = &#39;&#39;;\n                if(typeof options.description != &#39;undefined&#39;) description = options.description;\n                if(typeof options.type != &#39;undefined&#39;) type = options.type;\n                if(typeof options.position != &#39;undefined&#39;) position = options.position;\n                if(typeof options.html != &#39;undefined&#39;) html = options.html;\n                \n                window.dispatchEvent(new CustomEvent(&#39;toast-show&#39;, { detail : { type: type, message: message, description: description, position : position, html: html }}));\n            }\n	\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.Toasts().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen\"><div class=\"flex items-center ml-4\"><a href=\"/app\" class=\"text-lg font-bold\"><span class=\"text-blue-600\">BookBits</span> Editor</a></div><div class=\"flex items-center w-[30%]\"><div class=\"w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div></div><div class=\"flex items-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
