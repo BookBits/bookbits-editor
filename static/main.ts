@@ -1,7 +1,9 @@
-export function setupSession(xhr) {
+import { SessionResponse } from "./types/SessionResponse"
+
+export function setupSession(xhr: XMLHttpRequest) {
 	if (xhr.status === 200) {
 		try {
-			const tokensResponse = JSON.parse(xhr.responseText)
+			const tokensResponse: SessionResponse = JSON.parse(xhr.responseText)
 			const expiresAt = tokensResponse.expires_at
 
 			sessionStorage.setItem('expiresAt', expiresAt)
@@ -13,6 +15,6 @@ export function setupSession(xhr) {
 	}
 }
 
-export function handleLoginError(xhr) {
+export function handleLoginError(xhr: XMLHttpRequest) {
 	return xhr.responseText
 }
