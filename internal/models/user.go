@@ -90,6 +90,11 @@ func CreateUserWithPassword(username string, email string, password string, user
 	return createErr
 }
 
+func DeleteUserByID(id uuid.UUID, db *gorm.DB) error {
+	err := db.Delete(&User{}, id).Error
+	return err
+}
+
 func (user User) Validate(password string) error {
 	return bcrypt.CompareHashAndPassword(user.PasswordHash, append(user.PasswordSalt, []byte(password)...))
 }

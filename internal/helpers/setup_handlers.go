@@ -23,4 +23,6 @@ func SetupHandlers(app *fiber.App) {
 	app.Get("/app", handlers.AppHomeHandler, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Get("/users", handlers.GetUsers, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 	app.Post("/users", handlers.RegisterUser, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
+	app.Delete("/users/:uid", handlers.DeleteUser, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
+	app.Patch("/users/:uid/type", handlers.UpdateUserType, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 }

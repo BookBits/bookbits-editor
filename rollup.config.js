@@ -35,6 +35,8 @@ export default [{
 }, {
 		input: './static/packages.js',
 		output: {
+			name: 'packagesBundle',
+			exports: 'named',
 			file: './public/bundle-packages.js',
 			format: 'iife',
 		},

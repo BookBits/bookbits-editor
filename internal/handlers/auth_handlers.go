@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"log"
 	"time"
 
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/BookBits/bookbits-editor/templates/views"
-	"github.com/BookBits/bookbits-editor/templates/views/app"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/csrf"
 	"github.com/google/uuid"
@@ -155,29 +153,4 @@ func Logout(c fiber.Ctx) error {
 
 	c.Set("HX-Redirect", "/")
 	return c.SendStatus(200)
-}
-
-func RegisterUser(c fiber.Ctx) error {
-	username := c.FormValue("username")
-	user_email := c.FormValue("user-email")
-	password := c.FormValue("user-password")
-	user_type := c.FormValue("user-type")
-
-	state := c.Locals("state").(*models.AppState)
-	db := state.DB
-
-	err := models.CreateUserWithPassword(username, user_email, password, models.UserType(user_type), db)
-
-	if err != nil {
-		log.Fatal(err)
-		return c.Status(500).SendString("Unable to create user")
-	}
-
-	users, err := models.GetUsers(db)
-
-	if err != nil {
-		return c.Status(500).SendString("Unable to fetch users")
-	}
-
-	return renderer.RenderTempl(c, app.UserList(users))
 }

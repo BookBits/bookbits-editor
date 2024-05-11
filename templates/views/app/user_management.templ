@@ -2,6 +2,7 @@ package app
 
 import "github.com/BookBits/bookbits-editor/internal/models"
 import "fmt"
+import "strings"
 
 templ userTypeSelector() {
 <div x-data="{
@@ -22,7 +23,7 @@ templ userTypeSelector() {
     ]
 }" class="space-y-3">
     <template x-for="(option, index) in radioGroupOptions" :key="index">
-        <label @click="radioGroupSelectedValue=option.value" class="flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full">
+        <label @click="radioGroupSelectedValue=option.value" class="flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full p-2">
             <input type="radio" name="user-type" :value="option.value" :checked="radioGroupSelectedValue==option.value" class="text-gray-900 translate-y-px focus:ring-gray-700" />
             <span class="relative flex flex-col text-left space-y-1.5 leading-none text-sm">
                 <span x-text="option.title" class=""></span>
@@ -81,7 +82,7 @@ templ AddUser(csrfToken string) {
         @keydown.escape.window="popoverOpen=false"
         :class="{ 'top-0 mt-12' : popoverPosition == 'bottom', 'bottom-0 mb-12' : popoverPosition == 'top' }"
         class="absolute w-[300px] max-w-xl h-[400px] -translate-x-1/2 left-1/2 overflow-scroll" x-cloak>
-        <div x-ref="popoverInner" x-show="popoverOpen" class="w-full p-4 bg-white border rounded-md shadow-sm border-neutral-200/70">
+        <div x-ref="popoverInner" x-show="popoverOpen" class="w-full z-80 p-4 bg-white border rounded-md shadow-sm border-neutral-200/70">
             <div x-show="popoverArrow && popoverPosition == 'bottom'" class="absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-sm"></div></div>
             <div x-show="popoverArrow  && popoverPosition == 'top'" class="absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-sm"></div></div>
             <div class="grid gap-4">
@@ -135,31 +136,90 @@ templ AddUser(csrfToken string) {
 
 }
 
-templ UserTile(user models.User) {
-<li x-show={
+templ UserTile(user models.User, csrfToken string) {
+<li x-init="$nextTick(packagesBundle.loadIcons)" id={
+fmt.Sprintf("user-tile-%v", user.ID)
+} x-show={
         fmt.Sprintf("userSearchToken == '' || '%s'.toLowerCase().startsWith(userSearchToken.toLowerCase())", user.Username)
 }>
+<div class="flex flex-col" x-data="{optionsOpen: false}">
 <div class="flex flex-row p-4 w-full justify-between items-center border-b-neutral-300 border-1">
 	<div class="flex flex-col h-full justify-center items-start">
 		<h5 class="text-neutral-700 text-md font-semibold">{user.Username}</h5>
 		<p class="text-sm font-medium text-neutral-400">{user.Email}</p>
 		<p class="text-sm font-medium text-neutral-400">{user.Type.ToString()}</p>
 	</div>	
+	<div class="flex flex-col h-full justify-center items-start">
+        <button @click="optionsOpen = !optionsOpen" class="flex items-center justify-center w-10 h-10 bg-white rounded-full cursor-pointer hover:bg-neutral-100 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white">
+        <i data-lucide="ellipsis" class="w-4 h-4 text-neutral-500"></i>
+        </button>
+	</div>	
+</div>
+<div class="flex flex-row p-4 w-full justify-between items-center border-t" x-show="optionsOpen" @click.away="optionsOpen=false">
+        <div class="grid items-center gap-x-2 w-full gap-y-2">
+                <div class="grid items-center grid-cols-3 gap-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Change User Type:</label>
+                                <div x-data={
+                                fmt.Sprintf(
+                                "{user_%v_Type: '%v', user_%v_radioGroupOptions: [{title: 'Admin', value: 'admin'},{title: 'Reviewer', value: 'reviewer'},{title: 'Writer', value: 'writer'}]}", strings.ReplaceAll(user.ID.String(), "-", "_"), user.Type, strings.ReplaceAll(user.ID.String(), "-", "_"))
+                                } class="flex flex-row space-x-3">
+                                    <template x-for={
+                                    fmt.Sprintf("(option, index) in user_%v_radioGroupOptions", strings.ReplaceAll(user.ID.String(), "-", "_"))
+                                    } :key="index">
+                                        <label hx-patch={
+                                        fmt.Sprintf("/users/%v/type", user.ID)
+                                        } hx-trigger="click" hx-target={
+                                                fmt.Sprintf("#user-tile-%v", user.ID)
+                                        } hx-swap="outerHTML"
+                                        hx-headers={
+		                                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		                        }
+                                        @htmx:config-request="$event.detail.parameters['new-type']=option.value"
+                                        @click="userType=option.value" class="flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full p-2">
+                                            <input type="radio" x-bind:checked={
+                                            fmt.Sprintf("option.value===user_%v_Type", strings.ReplaceAll(user.ID.String(), "-", "_"))
+                                            } :value="option.value" class="text-gray-900 translate-y-px focus:ring-gray-700" />
+                                            <span class="relative text-left space-y-1.5 leading-none text-sm">
+                                                <span x-text="option.title" class=""></span>
+                                            </span>
+                                        </label>
+                                    </template>
+                                </div>
+                </div>
+                <div class="grid items-center grid-cols-3 gap-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Reset Password:</label>
+                        <button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
+                                Reset Password
+                        </button>
+                </div>
+                <div class="grid items-center grid-cols-3 gap-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Delete:</label>
+                        <button type="button" hx-delete={
+                        fmt.Sprintf("/users/%v", user.ID)
+                        } hx-trigger="click" 
+                        hx-headers={
+		                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		        } hx-target="#users-list" hx-swap="outerHTML" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-red-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-red-100 bg-red-50 hover:text-red-600 hover:bg-red-100">
+                                Delete User
+                        </button>
+                </div>
+        </div>
+</div>
 </div>
 </li>
 }
 
-templ UserList(users []models.User) {
-	<ul id="users-list" class="max-h-[600px] overflow-y-scroll">
+templ UserList(users []models.User, csrfToken string) {
+	<ul id="users-list" class="max-h-[600px] overflow-y-scroll" x-init="$nextTick(packagesBundle.loadIcons)">
 		for _, user := range users {
-			@UserTile(user)
+			@UserTile(user, csrfToken)
 		}
 	</ul>
 }
 
 templ UserManagementModal(csrfToken string) {
 <template x-teleport="body">
-        <div x-show="modalOpen" class="fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+        <div x-show="modalOpen" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
             <div x-show="modalOpen" 
                 x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0"
