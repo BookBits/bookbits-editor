@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"time"
 
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
@@ -37,6 +38,7 @@ func RefreshSession(c fiber.Ctx) error {
 
 	claims, err := models.ValidateToken(refreshToken, state.Vars.JWTSecretKey)
 	if err != nil {
+		log.Fatal(err)
 		if (hxRequest == "true") {
 			c.Set("HX-Redirect", "/login")
 			return c.SendStatus(302)
@@ -49,6 +51,7 @@ func RefreshSession(c fiber.Ctx) error {
 	accessToken, refreshToken, err := user.GenerateTokens(state.Vars)
 
 	if err != nil {
+		log.Fatal(err)
 		return c.SendStatus(500)
 	}
 
@@ -112,16 +115,19 @@ func Login(c fiber.Ctx) error {
 	err := state.DB.Where("email = ?", userEmail).First(&user).Error
 
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(422).SendString("Invalid Email Address")
 	}
 
 	validateErr := user.Validate(password)
 	if validateErr != nil {
+		log.Fatal(validateErr)
 		return c.Status(401).SendString("Invalid Password")
 	}
 
 	accessToken, refreshToken, err := user.GenerateTokens(state.Vars)
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(500).SendString("Server Error")
 	}
 

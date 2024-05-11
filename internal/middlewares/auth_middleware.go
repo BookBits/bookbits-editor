@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/gofiber/fiber/v3"
@@ -19,12 +20,14 @@ func AuthMiddleware(c fiber.Ctx) error {
 	claims, err := models.ValidateToken(accessToken, state.Vars.JWTSecretKey)
 
 	if err != nil {
+		log.Fatal(err)
 		state.User = models.User{}
 		return c.Next()
 	}
 
 	user, err := models.GetUserByID(claims.UserID, state.DB)
 	if err != nil {
+		log.Fatal(err)
 		return c.SendStatus(500)
 	}
 

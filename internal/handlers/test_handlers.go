@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"log"
+
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
 	"github.com/BookBits/bookbits-editor/internal/models"
 	ErrorResponses "github.com/BookBits/bookbits-editor/internal/models/error_responses"
@@ -28,6 +30,7 @@ func CheckDB(c fiber.Ctx) error {
 	err := db.Raw("SELECT 1").Find(&health).Error
 
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(fiber.ErrInternalServerError.Code).SendString(ErrorResponses.DBErrorMessage)
 	}
 
