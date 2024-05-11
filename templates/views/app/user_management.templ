@@ -89,7 +89,7 @@ templ AddUser(csrfToken string) {
                     <h4 class="font-medium leading-none">Create New User</h4>
                     <p class="text-sm text-muted-foreground">Enter details of the new user.</p>
                 </div>
-                <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2" hx-post="/users" hx-target="this" hx-swap="none" hx-headers={
+                <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2" hx-post="/users" hx-target="#users-list" hx-swap="outerHTML" hx-headers={
 		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
 		}
                 @htmx:response-error.window="$refs.addUserErrMsg.innerHTML=$event.detail.xhr.responseText"

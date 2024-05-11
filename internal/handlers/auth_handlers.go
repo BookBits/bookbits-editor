@@ -7,6 +7,7 @@ import (
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
 	"github.com/BookBits/bookbits-editor/internal/models"
 	"github.com/BookBits/bookbits-editor/templates/views"
+	"github.com/BookBits/bookbits-editor/templates/views/app"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/csrf"
 	"github.com/google/uuid"
@@ -172,5 +173,11 @@ func RegisterUser(c fiber.Ctx) error {
 		return c.Status(500).SendString("Unable to create user")
 	}
 
-	return c.SendStatus(200)
+	users, err := models.GetUsers(db)
+
+	if err != nil {
+		return c.Status(500).SendString("Unable to fetch users")
+	}
+
+	return renderer.RenderTempl(c, app.UserList(users))
 }
