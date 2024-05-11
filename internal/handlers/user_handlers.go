@@ -16,6 +16,7 @@ func GetUsers(c fiber.Ctx) error {
 	users, err := models.GetUsers(state.DB)
 
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(500).SendString("Error Fetching Users")
 	}
 	return renderer.RenderTempl(c, app.UserList(users, token))
@@ -40,6 +41,7 @@ func RegisterUser(c fiber.Ctx) error {
 	users, err := models.GetUsers(db)
 
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(500).SendString("Unable to fetch users")
 	}
 	
@@ -59,11 +61,13 @@ func DeleteUser(c fiber.Ctx) error {
 
 	delErr := models.DeleteUserByID(id, state.DB)
 	if delErr != nil {
+		log.Fatal(err)
 		return c.SendStatus(500)
 	}
 
 	users, err := models.GetUsers(state.DB)
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(500).SendString("Unable to fetch users")
 	}
 	token := csrf.TokenFromContext(c)
@@ -78,6 +82,7 @@ func UpdateUserType(c fiber.Ctx) error {
 
 	newType := c.FormValue("new-type")
 	if newType == "" {
+		log.Fatal(err)
 		return c.Status(400).SendString("Invalid user type")
 	}
 
@@ -85,11 +90,13 @@ func UpdateUserType(c fiber.Ctx) error {
 	updateErr := state.DB.Model(&models.User{ID: id}).Update("type", newTypeParsed).Error
 
 	if updateErr != nil {
+		log.Fatal(err)
 		return c.SendStatus(500)
 	}
 
 	user, err := models.GetUserByID(id, state.DB)
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(500).SendString("Error Fetching User")
 	}
 	token := csrf.TokenFromContext(c)
@@ -103,6 +110,7 @@ func ChangePassword(c fiber.Ctx) error {
 
 	err := state.User.UpdatePassword(currentPassword, newPassword, state.DB)
 	if err != nil {
+		log.Fatal(err)
 		return c.Status(400).SendString(err.Error())
 	}
 
@@ -116,17 +124,20 @@ func ChangePasswordRandom(c fiber.Ctx) error {
 	idVal := c.Params("uid")
 	id, err := uuid.Parse(idVal)
 	if err != nil {
+		log.Fatal(err)
 		return c.SendStatus(400)
 	}
 
 	user, err := models.GetUserByID(id, state.DB)
 	if err != nil {
+		log.Fatal(err)
 		return c.SendStatus(500)
 	}
 
 	newPass, err := user.UpdatePasswordRandom(state.DB)
 
 	if err != nil {
+		log.Fatal(err)
 		return c.SendStatus(500)
 	}
 

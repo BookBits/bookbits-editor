@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -148,6 +149,21 @@ func CreateUserWithPassword(username string, email string, password string, user
 	}
 
 	createErr := db.Create(&user).Error
+	if createErr != nil {
+		if mysqlErr, ok := createErr.(*mysql.MySQLError); ok {
+			if mysqlErr.Number == 1062 {
+				err := db.Unscoped().Where("email = ?", email).Delete(&User{}).Error
+				if err != nil {
+					return err
+				}
+				err = db.Create(&user).Error
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+		}
+	}
 	return createErr
 }
 
