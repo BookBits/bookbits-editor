@@ -1,0 +1,328 @@
+package app
+
+import "github.com/BookBits/bookbits-editor/internal/models"
+import "fmt"
+import "strings"
+
+templ userTypeSelector() {
+<div x-data="{
+    radioGroupSelectedValue: 'writer',
+    radioGroupOptions: [
+        {
+            title: 'Admin',
+            value: 'admin'
+        },
+        {
+            title: 'Reviewer',
+            value: 'reviewer'
+        },
+        {
+            title: 'Writer',
+            value: 'writer'
+        }
+    ]
+}" class="space-y-3">
+    <template x-for="(option, index) in radioGroupOptions" :key="index">
+        <label @click="radioGroupSelectedValue=option.value" class="flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full p-2">
+            <input type="radio" name="user-type" :value="option.value" :checked="radioGroupSelectedValue==option.value" class="text-gray-900 translate-y-px focus:ring-gray-700" />
+            <span class="relative flex flex-col text-left space-y-1.5 leading-none text-sm">
+                <span x-text="option.title" class=""></span>
+            </span>
+        </label>
+    </template>
+</div>
+}
+
+templ AddUser(csrfToken string) {
+<div x-data="{
+        popoverOpen: false,
+        popoverArrow: true,
+        popoverPosition: 'bottom',
+        popoverHeight: 0,
+        popoverOffset: 8,
+        popoverHeightCalculate() {
+            this.$refs.popover.classList.add('invisible'); 
+            this.popoverOpen=true; 
+            let that=this;
+            $nextTick(function(){ 
+                that.popoverHeight = that.$refs.popover.offsetHeight;
+                that.popoverOpen=false; 
+                that.$refs.popover.classList.remove('invisible');
+                that.$refs.popoverInner.setAttribute('x-transition', '');
+                that.popoverPositionCalculate();
+            });
+        },
+        popoverPositionCalculate(){
+            if(window.innerHeight < (this.$refs.popoverButton.getBoundingClientRect().top + this.$refs.popoverButton.offsetHeight + this.popoverOffset + this.popoverHeight)){
+                this.popoverPosition = 'top';
+            } else {
+                this.popoverPosition = 'bottom';
+            }
+        }
+    }"
+    x-init="
+        that = this;
+        window.addEventListener('resize', function(){
+            popoverPositionCalculate();
+        });
+        $watch('popoverOpen', function(value){
+            if(value){ popoverPositionCalculate(); document.getElementById('width').focus();  }
+        });
+    "
+    class="relative">
+    <button type="button" x-ref="popoverButton" @click="popoverOpen=!popoverOpen" class="h-10 flex flex-row items-center justify-center px-4 py-4 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
+	<i data-lucide="plus"></i> <span>New User</span>
+    </button>
+    
+    <div x-ref="popover"
+        x-show="popoverOpen"
+        x-init="setTimeout(function(){ popoverHeightCalculate(); }, 100);"
+        x-trap.inert="popoverOpen"
+        @click.away="popoverOpen=false;"
+        @keydown.escape.window="popoverOpen=false"
+        :class="{ 'top-0 mt-12' : popoverPosition == 'bottom', 'bottom-0 mb-12' : popoverPosition == 'top' }"
+        class="absolute w-[300px] max-w-xl h-[400px] -translate-x-1/2 left-1/2 overflow-scroll" x-cloak>
+        <div x-ref="popoverInner" x-show="popoverOpen" class="w-full z-80 p-4 bg-white border rounded-md shadow-sm border-neutral-200/70">
+            <div x-show="popoverArrow && popoverPosition == 'bottom'" class="absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-sm"></div></div>
+            <div x-show="popoverArrow  && popoverPosition == 'top'" class="absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-sm"></div></div>
+            <div class="grid gap-4">
+                <div class="space-y-2">
+                    <h4 class="font-medium leading-none">Create New User</h4>
+                    <p class="text-sm text-muted-foreground">Enter details of the new user.</p>
+                </div>
+                <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2" hx-post="/users" hx-target="#users-list" hx-swap="outerHTML" hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}
+                @htmx:response-error.window="$refs.addUserErrMsg.innerHTML=$event.detail.xhr.responseText"
+                @htmx:after-on-load="window.toast('User Added Successfully', {
+                        position: 'top-right',
+                        type: 'success'
+                }); popoverOpen=false"
+                >
+		<p x-ref="addUserErrMsg" class="text-sm font-light text-red-400"></p>
+                <div class="grid gap-x-2 gap-y-4">
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="username">Username</label><input 
+                    onkeyup="this.setCustomValidity('')"
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('Username cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="username" id="username" placeholder="New Username" type="text" /></div>
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Email</label><input 
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('Email cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="user-email" id="user-email" placeholder="Email Address" type="email" /></div>
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="password">Password</label><input
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('Password cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="user-password" id="password" placeholder="New Password" type="password"/></div>
+                    <div class="grid items-start grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Type</label>@userTypeSelector()</div>
+                </div>
+                <div class="flex flex-row w-full justify-end items-center mt-6 space-x-2">
+                <button @click="popoverOpen=false" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-red-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-red-100 bg-red-50 hover:text-red-600 hover:bg-red-100">
+                        Cancel
+                </button>
+
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-green-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-green-100 bg-green-50 hover:text-green-600 hover:bg-green-100">
+                        Save
+                </button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+}
+
+templ UserTile(user models.User, csrfToken string) {
+<li x-init="$nextTick(packagesBundle.loadIcons)" id={
+fmt.Sprintf("user-tile-%v", user.ID)
+} x-show={
+        fmt.Sprintf("userSearchToken == '' || '%s'.toLowerCase().startsWith(userSearchToken.toLowerCase())", user.Username)
+}>
+<div class="flex flex-col" x-data="{optionsOpen: false}">
+<div class="flex flex-row p-4 w-full justify-between items-center border-b-neutral-300 border-1">
+	<div class="flex flex-col h-full justify-center items-start">
+		<h5 class="text-neutral-700 text-md font-semibold">{user.Username}</h5>
+		<p class="text-sm font-medium text-neutral-400">{user.Email}</p>
+		<p class="text-sm font-medium text-neutral-400">{user.Type.ToString()}</p>
+	</div>	
+	<div class="flex flex-col h-full justify-center items-start">
+        <button @click="optionsOpen = !optionsOpen" class="flex items-center justify-center w-10 h-10 bg-white rounded-full cursor-pointer hover:bg-neutral-100 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white">
+        <i data-lucide="ellipsis" class="w-4 h-4 text-neutral-500"></i>
+        </button>
+	</div>	
+</div>
+<div class="flex flex-row p-4 w-full justify-between items-center border-t" x-show="optionsOpen" @click.away="optionsOpen=false">
+        <div class="grid items-center gap-x-2 w-full gap-y-2">
+                <div class="grid items-center grid-cols-3 gap-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Change User Type:</label>
+                                <div x-data={
+                                fmt.Sprintf(
+                                "{user_%v_Type: '%v', user_%v_radioGroupOptions: [{title: 'Admin', value: 'admin'},{title: 'Reviewer', value: 'reviewer'},{title: 'Writer', value: 'writer'}]}", strings.ReplaceAll(user.ID.String(), "-", "_"), user.Type, strings.ReplaceAll(user.ID.String(), "-", "_"))
+                                } class="flex flex-row space-x-3">
+                                    <template x-for={
+                                    fmt.Sprintf("(option, index) in user_%v_radioGroupOptions", strings.ReplaceAll(user.ID.String(), "-", "_"))
+                                    } :key="index">
+                                        <label hx-patch={
+                                        fmt.Sprintf("/users/%v/type", user.ID)
+                                        } hx-trigger="click" hx-target={
+                                                fmt.Sprintf("#user-tile-%v", user.ID)
+                                        } hx-swap="outerHTML"
+                                        hx-headers={
+		                                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		                        }
+                                        @htmx:config-request="$event.detail.parameters['new-type']=option.value"
+                                        @click="userType=option.value" class="flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full p-2">
+                                            <input type="radio" x-bind:checked={
+                                            fmt.Sprintf("option.value===user_%v_Type", strings.ReplaceAll(user.ID.String(), "-", "_"))
+                                            } :value="option.value" class="text-gray-900 translate-y-px focus:ring-gray-700" />
+                                            <span class="relative text-left space-y-1.5 leading-none text-sm">
+                                                <span x-text="option.title" class=""></span>
+                                            </span>
+                                        </label>
+                                    </template>
+                                </div>
+                </div>
+                <div class="grid items-center grid-cols-3 gap-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Reset Password:</label>
+                        <button type="button" hx-patch={
+                        fmt.Sprintf("/users/%v/password", user.ID)
+                        } hx-trigger="click" 
+                        hx-headers={
+		                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		        } hx-target="this" hx-swap="none" 
+                        @htmx:after-on-load={
+                        fmt.Sprintf("window.toast('New Password for User %s Copied to clipboard', {position: 'top-right',type: 'success'}); navigator.clipboard.writeText($event.detail.xhr.responseText)", user.Username)}
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
+                                Reset Password
+                        </button>
+                </div>
+                <div class="grid items-center grid-cols-3 gap-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Delete:</label>
+                        <button type="button" hx-delete={
+                        fmt.Sprintf("/users/%v", user.ID)
+                        } hx-trigger="click" 
+                        hx-headers={
+		                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		        } hx-target="#users-list" hx-swap="outerHTML" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-red-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-red-100 bg-red-50 hover:text-red-600 hover:bg-red-100">
+                                Delete User
+                        </button>
+                </div>
+        </div>
+</div>
+</div>
+</li>
+}
+
+templ UserList(users []models.User, csrfToken string) {
+	<ul id="users-list" class="max-h-[600px] overflow-y-scroll" x-init="$nextTick(packagesBundle.loadIcons)">
+		for _, user := range users {
+			@UserTile(user, csrfToken)
+		}
+	</ul>
+}
+
+templ UserManagementModal(csrfToken string) {
+<template x-teleport="body">
+        <div x-show="modalOpen" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="modalOpen" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="modalOpen=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="modalOpen"
+                x-trap.inert.noscroll="modalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Manage Users</h3>
+                    <button @click="modalOpen=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto" hx-get="/users" hx-target="#users-list" hx-swap="outerHTML" hx-trigger="load">
+			<div class="flex flex-col space-y-2 mt-2" x-data="{userSearchToken: ''}">
+				<div class="flex flex-row justify-between items-center space-x-1.5">
+				<div class="w-[75%] mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group">
+					<i data-lucide="search" class="w-4 h-4 text-neutral-500"></i>
+					<input type="text" placeholder="Search Users" x-model="userSearchToken" class="flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50" />
+				</div>
+                                @AddUser(csrfToken)
+				</div>
+				<ul id="users-list"></ul>
+			</div>
+                </div>
+            </div>
+        </div>
+    </template>
+}
+
+templ ChangePasswordModal(csrfToken string) {
+<template x-teleport="body">
+        <div x-show="changePasswordModal" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="changePasswordModal" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="changePasswordModal=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="changePasswordModal"
+                x-trap.inert.noscroll="changePasswordModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Change Password</h3>
+                    <button @click="changePasswordModal=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto">
+                <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2" hx-patch="/users/password" hx-target="this" hx-swap="none"
+                @htmx:response-error.window="$refs.changePasswordErrMsg.innerHTML=$event.detail.xhr.responseText"
+                hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}>
+		<p x-ref="changePasswordErrMsg" class="text-sm font-light text-red-400"></p>
+                <div class="grid gap-x-2 gap-y-4">
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="current-password">Current Password</label><input 
+                    onkeyup="this.setCustomValidity('')"
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('current password cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="current-password" id="current-password" placeholder="Enter Current Password" type="password" /></div>
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="password">New Password</label><input
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('Password cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="new-password" id="new-password" placeholder="Enter New Password" type="password"/></div>
+                </div>
+                <div class="flex flex-row w-full justify-end items-center mt-6 space-x-2">
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-green-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-green-100 bg-green-50 hover:text-green-600 hover:bg-green-100">
+                        Update Password
+                </button>
+                </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </template>
+}
+

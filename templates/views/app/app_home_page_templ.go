@@ -10,9 +10,14 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/BookBits/bookbits-editor/internal/models"
+import (
+	"fmt"
 
-func AppHomePage(user models.User) templ.Component {
+	"github.com/BookBits/bookbits-editor/internal/models"
+	"github.com/BookBits/bookbits-editor/templates/components"
+)
+
+func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -25,20 +30,109 @@ func AppHomePage(user models.User) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Dashboard | Bookbits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script></head><body><p>Welcome, ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n        dropdownOpen: false,\n	modalOpen: false,\n	changePasswordModal: false\n    }\" class=\"relative\"><button @click=\"dropdownOpen=true\" class=\"inline-flex items-center justify-center h-12 py-2 pl-3 pr-12 text-sm font-medium transition-colors bg-white border rounded-md text-neutral-700 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none disabled:opacity-50 disabled:pointer-events-none\"><span class=\"flex flex-col items-start flex-shrink-0 h-full ml-2 leading-none translate-y-px\"><span>Welcome, ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 16, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 20, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span> <span class=\"text-xs font-light text-neutral-400\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 21, Col: 73}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></span> <i data-lucide=\"chevron-down\" class=\"absolute right-0 w-5 h-5 mr-3\"></i></button><div x-show=\"dropdownOpen\" @click.away=\"dropdownOpen=false\" x-transition:enter=\"ease-out duration-200\" x-transition:enter-start=\"-translate-y-2\" x-transition:enter-end=\"translate-y-0\" class=\"absolute top-0 z-50 w-56 mt-12 -translate-x-1/2 left-1/2\" x-cloak><div class=\"p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700\"><div class=\"px-2 py-1.5 text-sm font-semibold\">My Account</div><div class=\"h-px my-1 -mx-1 bg-neutral-200\"></div><button class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"user-round\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Profile</span></button> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if user.Type == models.UserTypeAdmin {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button @click=\"modalOpen=true\" class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"wrench\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Manage Users</span></button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = UserManagementModal(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button @click=\"changePasswordModal=true\" class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"pencil\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Change Password</span></button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ChangePasswordModal(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-post=\"/logout\" hx-swap=\"none\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 54, Col: 55}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:before-on-load=\"appBundle.logout()\" class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"log-out\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Log out</span></button></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func AppHomePage(user models.User, csrfToken string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Dashboard | Bookbits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script></head><body x-data=\"{}\" x-init=\"\n	window.toast = function(message, options = {}){\n                let description = &#39;&#39;;\n                let type = &#39;default&#39;;\n                let position = &#39;top-center&#39;;\n                let html = &#39;&#39;;\n                if(typeof options.description != &#39;undefined&#39;) description = options.description;\n                if(typeof options.type != &#39;undefined&#39;) type = options.type;\n                if(typeof options.position != &#39;undefined&#39;) position = options.position;\n                if(typeof options.html != &#39;undefined&#39;) html = options.html;\n                \n                window.dispatchEvent(new CustomEvent(&#39;toast-show&#39;, { detail : { type: type, message: message, description: description, position : position, html: html }}));\n            }\n	\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.Toasts().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen\"><div class=\"flex items-center ml-4\"><a href=\"/app\" class=\"text-lg font-bold\"><span class=\"text-blue-600\">BookBits</span> Editor</a></div><div class=\"flex items-center w-[30%]\"><div class=\"w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div></div><div class=\"flex items-center mr-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = UserDropdownMenu(user, csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

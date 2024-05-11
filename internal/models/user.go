@@ -3,6 +3,7 @@ package models
 import (
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -20,6 +21,18 @@ const (
   UserTypeWriter  UserType = "writer"
 )
 
+func (ut UserType) ToString() string {
+	switch ut {
+	case UserTypeAdmin:
+		return "Admin"
+	case UserTypeReviewer:
+		return "Reviewer"
+	case UserTypeWriter:
+		return "Writer"
+	}
+	return ""
+}
+
 type User struct {
 	gorm.Model
 
@@ -36,6 +49,66 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	return err
 }
 
+func (u User) UpdatePassword(current string, newPass string, db *gorm.DB) error {
+	validateErr := u.Validate(current)
+	if validateErr != nil {
+		return fmt.Errorf("Current Password is incorrect")
+	}
+
+	salt := make([]byte, 16)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return err
+	}
+	hasedPassword, err := bcrypt.GenerateFromPassword(append(salt, []byte(newPass)...), 12)
+
+	if err != nil {
+		return err
+	}
+
+	saveErr := db.Model(&u).Updates(&User{PasswordSalt: salt, PasswordHash: hasedPassword}).Error
+	
+	return saveErr
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func generatePassword(length int) (string, error) {
+    buffer := make([]byte, length)
+    _, err := rand.Read(buffer)
+    if err != nil {
+        return "", fmt.Errorf("error generating random bytes: %w", err)
+    }
+    for i := range buffer {
+        buffer[i] = letterBytes[int(buffer[i])%len(letterBytes)]
+    }
+    return string(buffer), nil
+}
+
+func (u User) UpdatePasswordRandom(db *gorm.DB) (string, error) {
+	newPass, err := generatePassword(12)
+	if err != nil {
+		return "", err
+	}
+	salt := make([]byte, 16)
+	_, randErr := rand.Read(salt)
+	if randErr != nil {
+		return "", err
+	}
+	hasedPassword, err := bcrypt.GenerateFromPassword(append(salt, []byte(newPass)...), 12)
+
+	if err != nil {
+		return "", err
+	}
+
+	saveErr := db.Model(&u).Updates(&User{PasswordSalt: salt, PasswordHash: hasedPassword}).Error
+	
+	if saveErr != nil {
+		return "", saveErr
+	}
+	return newPass, nil
+}
+
 func GetUserByID(id uuid.UUID, db *gorm.DB) (User, error) {
 	var user User;
 	err := db.First(&user, id).Error
@@ -46,6 +119,12 @@ func GetUserByEmail(email string, db *gorm.DB) (User, error) {
 	var user User
 	err := db.Where("email = ?", email).Find(&user).Error
 	return user, err
+}
+
+func GetUsers(db *gorm.DB) ([]User, error) {
+	var users []User
+	err := db.Find(&users).Error
+	return users, err
 }
 
 func CreateUserWithPassword(username string, email string, password string, user_type UserType, db *gorm.DB) error {
@@ -70,6 +149,11 @@ func CreateUserWithPassword(username string, email string, password string, user
 
 	createErr := db.Create(&user).Error
 	return createErr
+}
+
+func DeleteUserByID(id uuid.UUID, db *gorm.DB) error {
+	err := db.Delete(&User{}, id).Error
+	return err
 }
 
 func (user User) Validate(password string) error {

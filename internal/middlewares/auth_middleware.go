@@ -41,3 +41,13 @@ func AuthOnlyRoute(c fiber.Ctx) error {
 
 	return c.Next()
 }
+
+func AdminOnlyRoute(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+
+	if state.User.Type != models.UserTypeAdmin {
+		return c.SendStatus(401)
+	}
+
+	return c.Next()
+}
