@@ -30,14 +30,14 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n        dropdownOpen: false,\n		modalOpen: false\n    }\" class=\"relative\"><button @click=\"dropdownOpen=true\" class=\"inline-flex items-center justify-center h-12 py-2 pl-3 pr-12 text-sm font-medium transition-colors bg-white border rounded-md text-neutral-700 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none disabled:opacity-50 disabled:pointer-events-none\"><span class=\"flex flex-col items-start flex-shrink-0 h-full ml-2 leading-none translate-y-px\"><span>Welcome, ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n        dropdownOpen: false,\n	modalOpen: false,\n	changePasswordModal: false\n    }\" class=\"relative\"><button @click=\"dropdownOpen=true\" class=\"inline-flex items-center justify-center h-12 py-2 pl-3 pr-12 text-sm font-medium transition-colors bg-white border rounded-md text-neutral-700 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none disabled:opacity-50 disabled:pointer-events-none\"><span class=\"flex flex-col items-start flex-shrink-0 h-full ml-2 leading-none translate-y-px\"><span>Welcome, ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 19, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 20, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -50,7 +50,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 20, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 21, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -70,6 +70,14 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button @click=\"changePasswordModal=true\" class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"pencil\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Change Password</span></button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ChangePasswordModal(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-post=\"/logout\" hx-swap=\"none\" hx-headers=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -78,7 +86,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 48, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 54, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

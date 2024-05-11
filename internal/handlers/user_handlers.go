@@ -95,3 +95,40 @@ func UpdateUserType(c fiber.Ctx) error {
 	token := csrf.TokenFromContext(c)
 	return renderer.RenderTempl(c, app.UserTile(user, token))
 }
+
+func ChangePassword(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	currentPassword := c.FormValue("current-password")
+	newPassword := c.FormValue("new-password")
+
+	err := state.User.UpdatePassword(currentPassword, newPassword, state.DB)
+	if err != nil {
+		return c.Status(400).SendString(err.Error())
+	}
+
+	c.ClearCookie()
+	c.Set("HX-Redirect", "/login")
+	return c.SendStatus(200)
+}
+
+func ChangePasswordRandom(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	idVal := c.Params("uid")
+	id, err := uuid.Parse(idVal)
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	user, err := models.GetUserByID(id, state.DB)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	newPass, err := user.UpdatePasswordRandom(state.DB)
+
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	return c.Status(200).SendString(newPass)
+}

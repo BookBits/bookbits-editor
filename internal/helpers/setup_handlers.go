@@ -25,4 +25,6 @@ func SetupHandlers(app *fiber.App) {
 	app.Post("/users", handlers.RegisterUser, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 	app.Delete("/users/:uid", handlers.DeleteUser, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 	app.Patch("/users/:uid/type", handlers.UpdateUserType, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
+	app.Patch("/users/password", handlers.ChangePassword, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Patch("/users/:uid/password", handlers.ChangePasswordRandom, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 }

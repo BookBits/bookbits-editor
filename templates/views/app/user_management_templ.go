@@ -249,15 +249,15 @@ func UserTile(user models.User, csrfToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :value=\"option.value\" class=\"text-gray-900 translate-y-px focus:ring-gray-700\"> <span class=\"relative text-left space-y-1.5 leading-none text-sm\"><span x-text=\"option.title\" class=\"\"></span></span></label></template></div></div><div class=\"grid items-center grid-cols-3 gap-2\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"user-email\">Reset Password:</label> <button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline\">Reset Password</button></div><div class=\"grid items-center grid-cols-3 gap-2\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"user-email\">Delete:</label> <button type=\"button\" hx-delete=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :value=\"option.value\" class=\"text-gray-900 translate-y-px focus:ring-gray-700\"> <span class=\"relative text-left space-y-1.5 leading-none text-sm\"><span x-text=\"option.title\" class=\"\"></span></span></label></template></div></div><div class=\"grid items-center grid-cols-3 gap-2\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"user-email\">Reset Password:</label> <button type=\"button\" hx-patch=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("/users/%v", user.ID))
+			fmt.Sprintf("/users/%v/password", user.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 198, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 192, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -271,9 +271,51 @@ func UserTile(user models.User, csrfToken string) templ.Component {
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 201, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 195, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"this\" hx-swap=\"none\" @htmx:after-on-load=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("window.toast('New Password for User %s Copied to clipboard', {position: 'top-right',type: 'success'}); navigator.clipboard.writeText($event.detail.xhr.responseText)", user.Username))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 198, Col: 218}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline\">Reset Password</button></div><div class=\"grid items-center grid-cols-3 gap-2\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"user-email\">Delete:</label> <button type=\"button\" hx-delete=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/users/%v", user.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 206, Col: 57}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"click\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var20 string
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 209, Col: 69}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -296,9 +338,9 @@ func UserList(users []models.User, csrfToken string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var18 == nil {
-			templ_7745c5c3_Var18 = templ.NopComponent
+		templ_7745c5c3_Var21 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var21 == nil {
+			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<ul id=\"users-list\" class=\"max-h-[600px] overflow-y-scroll\" x-init=\"$nextTick(packagesBundle.loadIcons)\">")
@@ -330,9 +372,9 @@ func UserManagementModal(csrfToken string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var19 == nil {
-			templ_7745c5c3_Var19 = templ.NopComponent
+		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var22 == nil {
+			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<template x-teleport=\"body\"><div x-show=\"modalOpen\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"modalOpen\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"modalOpen=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"modalOpen\" x-trap.inert.noscroll=\"modalOpen\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Manage Users</h3><button @click=\"modalOpen=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\" hx-get=\"/users\" hx-target=\"#users-list\" hx-swap=\"outerHTML\" hx-trigger=\"load\"><div class=\"flex flex-col space-y-2 mt-2\" x-data=\"{userSearchToken: &#39;&#39;}\"><div class=\"flex flex-row justify-between items-center space-x-1.5\"><div class=\"w-[75%] mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search Users\" x-model=\"userSearchToken\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div>")
@@ -344,6 +386,44 @@ func UserManagementModal(csrfToken string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><ul id=\"users-list\"></ul></div></div></div></div></template>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func ChangePasswordModal(csrfToken string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var23 == nil {
+			templ_7745c5c3_Var23 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<template x-teleport=\"body\"><div x-show=\"changePasswordModal\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"changePasswordModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"changePasswordModal=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"changePasswordModal\" x-trap.inert.noscroll=\"changePasswordModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Change Password</h3><button @click=\"changePasswordModal=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\"><form class=\"flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2\" hx-patch=\"/users/password\" hx-target=\"this\" hx-swap=\"none\" @htmx:response-error.window=\"$refs.changePasswordErrMsg.innerHTML=$event.detail.xhr.responseText\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 301, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><p x-ref=\"changePasswordErrMsg\" class=\"text-sm font-light text-red-400\"></p><div class=\"grid gap-x-2 gap-y-4\"><div class=\"grid items-center grid-cols-3 gap-4\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"current-password\">Current Password</label><input onkeyup=\"this.setCustomValidity(&#39;&#39;)\" hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;current password cannot be empty&#39;)\n                    }\" class=\"flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"current-password\" id=\"current-password\" placeholder=\"Enter Current Password\" type=\"password\"></div><div class=\"grid items-center grid-cols-3 gap-4\"><label class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"password\">New Password</label><input hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;Password cannot be empty&#39;)\n                    }\" class=\"flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"new-password\" id=\"new-password\" placeholder=\"Enter New Password\" type=\"password\"></div></div><div class=\"flex flex-row w-full justify-end items-center mt-6 space-x-2\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-green-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-green-100 bg-green-50 hover:text-green-600 hover:bg-green-100\">Update Password</button></div></form></div></div></div></template>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

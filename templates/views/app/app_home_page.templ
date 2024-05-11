@@ -10,7 +10,8 @@ import (
 templ UserDropdownMenu(user models.User, csrfToken string) {
 <div x-data="{
         dropdownOpen: false,
-		modalOpen: false
+	modalOpen: false,
+	changePasswordModal: false
     }"
     class="relative">
 
@@ -43,6 +44,11 @@ templ UserDropdownMenu(user models.User, csrfToken string) {
             </button>
 			@UserManagementModal(csrfToken)
 			}
+            <button @click="changePasswordModal=true" class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+				<i data-lucide="pencil" class="h-4 w-4 text-neutral-500"></i>
+                <span>Change Password</span>
+            </button>
+			@ChangePasswordModal(csrfToken)
             <button hx-post="/logout" hx-swap="none"
 			hx-headers={
 				fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
