@@ -28,7 +28,7 @@ templ LoginPage(csrf_token string) {
 				@htmx:after-on-load="
 					mainBundle.setupSession($event.detail.xhr)
 				"
-				@htmx:response-error.window="$refs.loginErrMsg.innerHTML = mainBundle.handleLoginError($event.detail.xhr)" id="login-form" class="mt-8 flex flex-col space-y-5 w-full p-0" hx-post="/login" hx-target="this" hx-swap="none"
+				@htmx:response-error.window="$refs.loginErrMsg.innerHTML = $event.detail.xhr.responseText" id="login-form" class="mt-8 flex flex-col space-y-5 w-full p-0" hx-post="/login" hx-target="this" hx-swap="none"
 				hx-headers={
 					fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrf_token)
 				}

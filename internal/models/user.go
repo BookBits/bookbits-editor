@@ -4,10 +4,8 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -53,7 +51,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 func (u User) UpdatePassword(current string, newPass string, db *gorm.DB) error {
 	validateErr := u.Validate(current)
 	if validateErr != nil {
-		return fmt.Errorf("Current Password is incorrect")
+		return fmt.Errorf("Current Password provided is incorrect")
 	}
 
 	salt := make([]byte, 16)
@@ -64,12 +62,15 @@ func (u User) UpdatePassword(current string, newPass string, db *gorm.DB) error 
 	hasedPassword, err := bcrypt.GenerateFromPassword(append(salt, []byte(newPass)...), 12)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Couldn't complete request due to server error")
 	}
 
 	saveErr := db.Model(&u).Updates(&User{PasswordSalt: salt, PasswordHash: hasedPassword}).Error
 	
-	return saveErr
+	if saveErr != nil {
+		return fmt.Errorf("Couldn't complete request due to server error")
+	}
+	return nil
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -99,13 +100,13 @@ func (u User) UpdatePasswordRandom(db *gorm.DB) (string, error) {
 	hasedPassword, err := bcrypt.GenerateFromPassword(append(salt, []byte(newPass)...), 12)
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Couldn't complete request due to server error")
 	}
 
 	saveErr := db.Model(&u).Updates(&User{PasswordSalt: salt, PasswordHash: hasedPassword}).Error
 	
 	if saveErr != nil {
-		return "", saveErr
+		return "", fmt.Errorf("Couldn't complete request due to server error")
 	}
 	return newPass, nil
 }
@@ -149,26 +150,11 @@ func CreateUserWithPassword(username string, email string, password string, user
 	}
 
 	createErr := db.Create(&user).Error
-	if createErr != nil {
-		if mysqlErr, ok := createErr.(*mysql.MySQLError); ok {
-			if mysqlErr.Number == 1062 {
-				err := db.Unscoped().Where("email = ?", email).Delete(&User{}).Error
-				if err != nil {
-					return err
-				}
-				err = db.Create(&user).Error
-				if err != nil {
-					return err
-				}
-				return nil
-			}
-		}
-	}
 	return createErr
 }
 
 func DeleteUserByID(id uuid.UUID, db *gorm.DB) error {
-	err := db.Delete(&User{}, id).Error
+	err := db.Unscoped().Delete(&User{}, id).Error
 	return err
 }
 
@@ -212,7 +198,6 @@ func ValidateToken(tokenString string, key []byte) (*UserClaims, error) {
     if errors.Is(err, jwt.ErrSignatureInvalid) {
       return nil, errors.New("invalid token signature")
     } else {
-	  log.Fatal(err)
       return nil, err
     }
   }

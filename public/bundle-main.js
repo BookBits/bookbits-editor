@@ -1,1 +1,23 @@
-var mainBundle=function(e){"use strict";return e.handleLoginError=function(e){return e.responseText},e.setupSession=function(e){if(200===e.status)try{var t=JSON.parse(e.responseText).expires_at;sessionStorage.setItem("expiresAt",t);var s=new CustomEvent("session-setup");document.body.dispatchEvent(s)}catch(e){}},e}({});
+var mainBundle = (function (exports) {
+    'use strict';
+
+    function setupSession(xhr) {
+        if (xhr.status === 200) {
+            try {
+                var tokensResponse = JSON.parse(xhr.responseText);
+                var expiresAt = tokensResponse.expires_at;
+                sessionStorage.setItem('expiresAt', expiresAt);
+                var redirectEvent = new CustomEvent('session-setup');
+                document.body.dispatchEvent(redirectEvent);
+            }
+            catch (error) {
+                // parse failed
+            }
+        }
+    }
+
+    exports.setupSession = setupSession;
+
+    return exports;
+
+})({});
