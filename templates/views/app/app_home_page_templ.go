@@ -56,7 +56,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></span> <i data-lucide=\"chevron-down\" class=\"absolute right-0 w-5 h-5 mr-3\"></i></button><div x-show=\"dropdownOpen\" @click.away=\"dropdownOpen=false\" x-transition:enter=\"ease-out duration-200\" x-transition:enter-start=\"-translate-y-2\" x-transition:enter-end=\"translate-y-0\" class=\"absolute top-0 z-50 w-56 mt-12 -translate-x-1/2 left-1/2\" x-cloak><div class=\"p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700\"><div class=\"px-2 py-1.5 text-sm font-semibold\">My Account</div><div class=\"h-px my-1 -mx-1 bg-neutral-200\"></div><button class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"user-round\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Profile</span></button> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></span> <i data-lucide=\"chevron-down\" class=\"absolute right-0 w-5 h-5 mr-3\"></i></button><div x-show=\"dropdownOpen\" @click.away=\"dropdownOpen=false\" x-transition:enter=\"ease-out duration-200\" x-transition:enter-start=\"-translate-y-2\" x-transition:enter-end=\"translate-y-0\" class=\"absolute top-0 z-50 w-56 mt-12 -translate-x-1/2 left-1/2\" x-cloak><div class=\"p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700\"><div class=\"px-2 py-1.5 text-sm font-semibold\">My Account</div><div class=\"h-px my-1 -mx-1 bg-neutral-200\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,7 +86,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 54, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 50, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

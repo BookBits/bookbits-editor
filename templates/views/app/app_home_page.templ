@@ -33,10 +33,6 @@ templ UserDropdownMenu(user models.User, csrfToken string) {
         <div class="p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700">
             <div class="px-2 py-1.5 text-sm font-semibold">My Account</div>
             <div class="h-px my-1 -mx-1 bg-neutral-200"></div>
-            <button class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-				<i data-lucide="user-round" class="h-4 w-4 text-neutral-500"></i>
-                <span>Profile</span>
-            </button>
 			if user.Type == models.UserTypeAdmin {
             <button @click="modalOpen=true" class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
 				<i data-lucide="wrench" class="h-4 w-4 text-neutral-500"></i>

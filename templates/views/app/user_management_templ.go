@@ -27,7 +27,7 @@ func userTypeSelector() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n    radioGroupSelectedValue: &#39;writer&#39;,\n    radioGroupOptions: [\n        {\n            title: &#39;Admin&#39;,\n            value: &#39;admin&#39;\n        },\n        {\n            title: &#39;Reviewer&#39;,\n            value: &#39;reviewer&#39;\n        },\n        {\n            title: &#39;Writer&#39;,\n            value: &#39;writer&#39;\n        }\n    ]\n}\" class=\"space-y-3\"><template x-for=\"(option, index) in radioGroupOptions\" :key=\"index\"><label @click=\"radioGroupSelectedValue=option.value\" class=\"flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full p-2\"><input type=\"radio\" name=\"user-type\" :value=\"option.value\" :checked=\"radioGroupSelectedValue==option.value\" class=\"text-gray-900 translate-y-px focus:ring-gray-700\"> <span class=\"relative flex flex-col text-left space-y-1.5 leading-none text-sm\"><span x-text=\"option.title\" class=\"\"></span></span></label></template></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n    radioGroupSelectedValue: &#39;writer&#39;,\n    radioGroupOptions: [\n        {\n            title: &#39;Admin&#39;,\n            value: &#39;admin&#39;\n        },\n        {\n            title: &#39;Manager&#39;,\n            value: &#39;manager&#39;\n        },\n        {\n            title: &#39;Writer&#39;,\n            value: &#39;writer&#39;\n        }\n    ]\n}\" class=\"space-y-3\"><template x-for=\"(option, index) in radioGroupOptions\" :key=\"index\"><label @click=\"radioGroupSelectedValue=option.value\" class=\"flex items-start space-x-3 bg-white rounded-md shadow-sm hover:bg-gray-50 w-full p-2\"><input type=\"radio\" name=\"user-type\" :value=\"option.value\" :checked=\"radioGroupSelectedValue==option.value\" class=\"text-gray-900 translate-y-px focus:ring-gray-700\"> <span class=\"relative flex flex-col text-left space-y-1.5 leading-none text-sm\"><span x-text=\"option.title\" class=\"\"></span></span></label></template></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -171,9 +171,9 @@ func UserTile(user models.User, csrfToken string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf(
-				"{user_%v_Type: '%v', user_%v_radioGroupOptions: [{title: 'Admin', value: 'admin'},{title: 'Reviewer', value: 'reviewer'},{title: 'Writer', value: 'writer'}]}", strings.ReplaceAll(user.ID.String(), "-", "_"), user.Type, strings.ReplaceAll(user.ID.String(), "-", "_")))
+				"{user_%v_Type: '%v', user_%v_radioGroupOptions: [{title: 'Admin', value: 'admin'},{title: 'Manager', value: 'manager'},{title: 'Writer', value: 'writer'}]}", strings.ReplaceAll(user.ID.String(), "-", "_"), user.Type, strings.ReplaceAll(user.ID.String(), "-", "_")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 168, Col: 299}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/user_management.templ`, Line: 168, Col: 297}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
