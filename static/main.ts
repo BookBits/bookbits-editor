@@ -14,7 +14,3 @@ export function setupSession(xhr: XMLHttpRequest) {
 		}
 	}
 }
-
-export function handleLoginError(xhr: XMLHttpRequest) {
-	return xhr.responseText
-}

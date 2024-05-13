@@ -93,26 +93,30 @@ templ AddUser(csrfToken string) {
                 <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2" hx-post="/users" hx-target="#users-list" hx-swap="outerHTML" hx-headers={
 		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
 		}
-                @htmx:response-error.window="$refs.addUserErrMsg.innerHTML=$event.detail.xhr.responseText"
                 @htmx:after-on-load="window.toast('User Added Successfully', {
                         position: 'top-right',
                         type: 'success'
-                }); popoverOpen=false"
+                }); 
+                $refs.newUsernameInput.value = '';
+                $refs.newUserEmailInput.value = '';
+                $refs.newUserPasswordInput.value = '';
+                popoverOpen=false;"
                 >
-		<p x-ref="addUserErrMsg" class="text-sm font-light text-red-400"></p>
                 <div class="grid gap-x-2 gap-y-4">
-                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="username">Username</label><input 
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="username">Username</label><input x-ref="newUsernameInput"
                     onkeyup="this.setCustomValidity('')"
                     hx-on:htmx:validation:validate="if (this.value == '') {
                     this.setCustomValidity('Username cannot be empty')
                     }"
                     class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="username" id="username" placeholder="New Username" type="text" /></div>
-                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Email</label><input 
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="user-email">Email</label><input x-ref="newUserEmailInput"
+                    onkeyup="this.setCustomValidity('')"
                     hx-on:htmx:validation:validate="if (this.value == '') {
                     this.setCustomValidity('Email cannot be empty')
                     }"
                     class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="user-email" id="user-email" placeholder="Email Address" type="email" /></div>
-                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="password">Password</label><input
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="password">Password</label><input x-ref="newUserPasswordInput"
+                    onkeyup="this.setCustomValidity('')"
                     hx-on:htmx:validation:validate="if (this.value == '') {
                     this.setCustomValidity('Password cannot be empty')
                     }"
@@ -193,7 +197,7 @@ fmt.Sprintf("user-tile-%v", user.ID)
                         } hx-trigger="click" 
                         hx-headers={
 		                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
-		        } hx-target="this" hx-swap="none" 
+		        } hx-target="this" hx-swap="none"
                         @htmx:after-on-load={
                         fmt.Sprintf("window.toast('New Password for User %s Copied to clipboard', {position: 'top-right',type: 'success'}); navigator.clipboard.writeText($event.detail.xhr.responseText)", user.Username)}
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
@@ -207,7 +211,7 @@ fmt.Sprintf("user-tile-%v", user.ID)
                         } hx-trigger="click" 
                         hx-headers={
 		                fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
-		        } hx-target="#users-list" hx-swap="outerHTML" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-red-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-red-100 bg-red-50 hover:text-red-600 hover:bg-red-100">
+		        } hx-target="#users-list" hx-swap="outerHTML" @htmx:after-on-load="window.toast('User Deleted Successfully', {position: 'top-right', type: 'success'})" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-red-500 transition-colors duration-100 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-red-100 bg-red-50 hover:text-red-600 hover:bg-red-100">
                                 Delete User
                         </button>
                 </div>
@@ -296,11 +300,9 @@ templ ChangePasswordModal(csrfToken string) {
                 </div>
                 <div class="relative w-auto">
                 <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2" hx-patch="/users/password" hx-target="this" hx-swap="none"
-                @htmx:response-error.window="$refs.changePasswordErrMsg.innerHTML=$event.detail.xhr.responseText"
                 hx-headers={
 		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
 		}>
-		<p x-ref="changePasswordErrMsg" class="text-sm font-light text-red-400"></p>
                 <div class="grid gap-x-2 gap-y-4">
                     <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="current-password">Current Password</label><input 
                     onkeyup="this.setCustomValidity('')"

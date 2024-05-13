@@ -86,7 +86,10 @@ templ AppHomePage(user models.User, csrfToken string) {
                 
                 window.dispatchEvent(new CustomEvent('toast-show', { detail : { type: type, message: message, description: description, position : position, html: html }}));
             }
-	">
+	" @htmx:response-error.window="window.toast($event.detail.xhr.responseText, {
+                        position: 'top-right',
+                        type: 'danger'
+                })">
 		@components.Toasts()
 		<header class="bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen">
 		  <div class="flex items-center ml-4">
