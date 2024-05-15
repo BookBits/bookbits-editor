@@ -101,6 +101,11 @@ templ AppHomePage(user models.User, csrfToken string) {
 			@UserDropdownMenu(user, csrfToken)
 		  </div>
 		</header>
+		<div class="w-screen h-screen overflow-scroll flex flex-col items-center">
+			<div class="w-[90%] max-h-[800px] overflow-scroll">
+				@ProjectsSection(csrfToken, user)
+			</div>
+		</div>
 	</body>
 </html>
 }

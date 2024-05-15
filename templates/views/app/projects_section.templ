@@ -1,0 +1,127 @@
+package app
+
+import (
+	"fmt"
+
+	"github.com/BookBits/bookbits-editor/internal/models"
+)
+
+templ ProjectListElement(project models.Project) {
+<tr class="text-neutral-800 w-full hover:bg-gray-50">
+        <td class="px-5 py-2 text-sm font-medium whitespace-nowrap">
+	<div class="flex flex-row justify-start w-full items-center space-x-2">
+		<i data-lucide="folder-dot" class="text-neutral-500 w-4 h-4"></i>
+		<span>{ project.Name }</span>
+	</div>
+	</td>
+        <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{ fmt.Sprintf("%v/%v/%v %v:%v", project.CreatedAt.Day(), int(project.CreatedAt.Month()), project.CreatedAt.Year(), project.CreatedAt.Hour(), project.CreatedAt.Minute()) }</td>
+        <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{project.Creator.Username}</td>
+        <td class="px-5 py-2 text-sm whitespace-nowrap text-right">
+	<div class="flex flex-row w-full justify-end items-center">
+		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-neutral-100 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white">
+		<i data-lucide="ellipsis-vertical" class="text-neutral-700 w-4 h-4"></i>
+		</button>	
+	</div>
+	</td>
+</tr>
+}
+
+type Projects []models.Project
+
+templ ProjectsList(projects Projects) {
+	<table x-data="{}" x-init="$nextTick(packagesBundle.loadIcons)" id="projects" class="w-full divide-y divide-neutral-200 table-fixed mt-4">
+		<thead>
+			<tr class="text-neutral-500">
+				<th class="w-3/5 px-5 py-3 text-xs font-bold text-left uppercase">Name</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-center uppercase">Created At</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-center uppercase">Created By</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-right uppercase"></th>
+			</tr>
+		</thead>
+		<tbody class="divide-y divide-neutral-200">
+			for _, project := range projects {
+				@ProjectListElement(project)
+			}
+		</tbody>
+	</table>
+}
+
+templ ProjectsSection(csrfToken string, user models.User) {
+	<div x-data="{
+	createProjectModal: false
+	}" class="w-full h-full flex flex-col items-start justify-start p-4">	
+		<div class="w-full flex flex-row justify-between items-center">
+			<h5 class="font-bold text-xl">Your Projects</h5>
+			if (user.Type != models.UserTypeWriter) {
+			<button @click="createProjectModal=true" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
+				<i data-lucide="folder-plus" class="text-white h-4 w-4 mr-2"></i> <span>New Project</span>
+			</button>
+			@CreateProjectModal(csrfToken)
+			}
+		</div>
+		<div class="flex flex-col max-h-[800px] overflow-scroll w-full">
+			<div id="projects" hx-get="/projects" hx-target="this" hx-swap="outerHTML" hx-trigger="load"></div>
+		</div>
+	</div>
+}
+
+templ CreateProjectModal(csrfToken string) {
+<template x-teleport="body">
+        <div x-show="createProjectModal" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="createProjectModal" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="createProjectModal=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="createProjectModal"
+                x-trap.inert.noscroll="createProjectModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Create New Project</h3>
+                    <button @click="createProjectModal=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto">
+                <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2"
+		hx-post="/projects" hx-target="#projects" hx-swap="outerHTML" 
+		@htmx:before-send="
+			$refs.createBtn.innerHTML='Creating...'
+			$refs.createBtn.disabled = true
+		" 
+		@htmx:before-on-load="
+			$refs.createBtn.innerHTML='Create'
+			$refs.createBtn.disabled = false
+		" 
+		@htmx:after-on-load="window.toast('Project Successfully Created', {position: 'top-right', type: 'success'}); createProjectModal=false; $refs.projectNameInput.value=''"
+                hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}>
+                <div class="grid gap-x-2 gap-y-4">
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="current-password">New Project Name</label><input 
+                    onkeyup="this.setCustomValidity('')"
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('project name cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="new-project-name" id="new-project-name" x-ref="projectNameInput" placeholder="Enter New Project Name" type="text" /></div>
+                </div>
+                <div class="flex flex-row w-full justify-end items-center mt-6 space-x-2 p-2">
+                <button x-ref="createBtn" type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-300 disabled:text-neutral-700">
+                        Create
+                </button>
+                </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </template>
+}

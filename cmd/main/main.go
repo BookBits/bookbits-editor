@@ -43,8 +43,14 @@ func main() {
 		return
 	}
 
+	//setup Cache
+	cache := helpers.SetupCache(vars)
+
+	//setup VCS
+	vcs := models.NewGitClient(vars)
+
 	//Setup AppState
-	app.Use(models.WithAppState(db, vars))
+	app.Use(models.WithAppState(db, vars, vcs, cache))
 	
 	app.Use(csrf.New(csrf.Config{
 		KeyLookup: "header:X-CSRF-Token",

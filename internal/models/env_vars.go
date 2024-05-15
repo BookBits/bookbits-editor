@@ -10,4 +10,10 @@ type EnvVars struct {
 	JWTSecretKey []byte
 	DefaultAdminUserEmail string
 	DefaultAdminPassword string
+	GitRepo string
+	GitOwner string
+	GitToken string
+	RedisPort string
+	RedisAddr string
+	RedisPassword string
 }
