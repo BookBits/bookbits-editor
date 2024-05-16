@@ -7,19 +7,26 @@ import (
 )
 
 templ ProjectListElement(project models.Project) {
-<tr class="text-neutral-800 w-full hover:bg-gray-50">
+<tr x-data="{showOptions: false}" @mouseenter="showOptions=true" @mouseleave="showOptions=false" class="text-neutral-800 w-full hover:bg-gray-50 group h-12">
         <td class="px-5 py-2 text-sm font-medium whitespace-nowrap">
 	<div class="flex flex-row justify-start w-full items-center space-x-2">
 		<i data-lucide="folder-dot" class="text-neutral-500 w-4 h-4"></i>
-		<span>{ project.Name }</span>
+		<span><a hx-get={
+		fmt.Sprintf("/app/projects/%v/files", project.ID)
+		} hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="decoration-none hover:underline cursor-pointer">{ project.Name }</a></span>
 	</div>
 	</td>
         <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{ fmt.Sprintf("%v/%v/%v %v:%v", project.CreatedAt.Day(), int(project.CreatedAt.Month()), project.CreatedAt.Year(), project.CreatedAt.Hour(), project.CreatedAt.Minute()) }</td>
         <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{project.Creator.Username}</td>
-        <td class="px-5 py-2 text-sm whitespace-nowrap text-right">
-	<div class="flex flex-row w-full justify-end items-center">
-		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-neutral-100 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white">
-		<i data-lucide="ellipsis-vertical" class="text-neutral-700 w-4 h-4"></i>
+        <td class="px-5 text-sm whitespace-nowrap text-right">
+	<div x-show="showOptions" class="flex flex-row w-full justify-end items-center space-x-1.5">
+		<button hx-get={
+		fmt.Sprintf("/app/projects/%v/files", project.ID)
+		} hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="folder-open" class="text-slate-500 w-4 h-4"></i>
+		</button>	
+		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="trash-2" class="text-slate-500 w-4 h-4"></i>
 		</button>	
 	</div>
 	</td>
@@ -29,7 +36,7 @@ templ ProjectListElement(project models.Project) {
 type Projects []models.Project
 
 templ ProjectsList(projects Projects) {
-	<table x-data="{}" x-init="$nextTick(packagesBundle.loadIcons)" id="projects" class="w-full divide-y divide-neutral-200 table-fixed mt-4">
+	<table x-data="{}" id="projects" class="w-full divide-y divide-neutral-200 table-fixed mt-4">
 		<thead>
 			<tr class="text-neutral-500">
 				<th class="w-3/5 px-5 py-3 text-xs font-bold text-left uppercase">Name</th>
@@ -46,12 +53,12 @@ templ ProjectsList(projects Projects) {
 	</table>
 }
 
-templ ProjectsSection(csrfToken string, user models.User) {
+templ ProjectsSection(csrfToken string, user models.User, projects Projects) {
 	<div x-data="{
 	createProjectModal: false
-	}" class="w-full h-full flex flex-col items-start justify-start p-4">	
+	}" class="w-full h-full flex flex-col items-start justify-start p-4" id="page-content">	
 		<div class="w-full flex flex-row justify-between items-center">
-			<h5 class="font-bold text-xl">Your Projects</h5>
+			<h5 class="font-bold text-lg p-2">Your Projects</h5>
 			if (user.Type != models.UserTypeWriter) {
 			<button @click="createProjectModal=true" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
 				<i data-lucide="folder-plus" class="text-white h-4 w-4 mr-2"></i> <span>New Project</span>
@@ -59,14 +66,13 @@ templ ProjectsSection(csrfToken string, user models.User) {
 			@CreateProjectModal(csrfToken)
 			}
 		</div>
-		<div class="flex flex-col max-h-[800px] overflow-scroll w-full">
-			<div id="projects" hx-get="/projects" hx-target="this" hx-swap="outerHTML" hx-trigger="load"></div>
+		<div class="flex flex-col max-h-full w-full overflow-y-scroll">
+			@ProjectsList(projects)
 		</div>
 	</div>
 }
 
 templ CreateProjectModal(csrfToken string) {
-<template x-teleport="body">
         <div x-show="createProjectModal" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
             <div x-show="createProjectModal" 
                 x-transition:enter="ease-out duration-300"
@@ -93,7 +99,7 @@ templ CreateProjectModal(csrfToken string) {
                 </div>
                 <div class="relative w-auto">
                 <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2"
-		hx-post="/projects" hx-target="#projects" hx-swap="outerHTML" 
+		hx-post="/app/projects" hx-target="#projects" hx-swap="outerHTML" 
 		@htmx:before-send="
 			$refs.createBtn.innerHTML='Creating...'
 			$refs.createBtn.disabled = true
@@ -102,12 +108,12 @@ templ CreateProjectModal(csrfToken string) {
 			$refs.createBtn.innerHTML='Create'
 			$refs.createBtn.disabled = false
 		" 
-		@htmx:after-on-load="window.toast('Project Successfully Created', {position: 'top-right', type: 'success'}); createProjectModal=false; $refs.projectNameInput.value=''"
+		@htmx:after-on-load="window.toast('Project Successfully Created', {position: 'top-right', type: 'success'}); packagesBundle.loadIcons(); createProjectModal=false; $refs.projectNameInput.value=''"
                 hx-headers={
 		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
 		}>
                 <div class="grid gap-x-2 gap-y-4">
-                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="current-password">New Project Name</label><input 
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="new-project-name">New Project Name</label><input 
                     onkeyup="this.setCustomValidity('')"
                     hx-on:htmx:validation:validate="if (this.value == '') {
                     this.setCustomValidity('project name cannot be empty')
@@ -123,5 +129,4 @@ templ CreateProjectModal(csrfToken string) {
                 </div>
             </div>
         </div>
-    </template>
 }

@@ -11,6 +11,13 @@ import (
 func AppHomeHandler(c fiber.Ctx) error {
 	state := c.Locals("state").(*models.AppState)
 	csrfToken := csrf.TokenFromContext(c)
+	projects, err := state.User.GetProjects(state.DB)
 
-	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken))
+	if err != nil {
+		return c.Status(500).SendString("Unable to fetch projects")
+	}
+
+
+	content := app.ProjectsSection(csrfToken, state.User, projects)
+	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, "Dashboard | Bookbits Editor", content))
 }

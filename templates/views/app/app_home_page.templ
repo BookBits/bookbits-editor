@@ -58,16 +58,16 @@ templ UserDropdownMenu(user models.User, csrfToken string) {
 </div>
 }
 
-templ AppHomePage(user models.User, csrfToken string) {
+templ AppHomePage(user models.User, csrfToken string, title string, content templ.Component) {
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Dashboard | Bookbits Editor</title>
+		<title>{title}</title>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<script src="/static/bundle-packages.js" defer></script>
-		<script src="/static/bundle-app.js"></script>
 	</head>
+	<script src="/static/bundle-packages.js" defer></script>
+	<script src="/static/bundle-app.js"></script>
 	<body x-data="{}"
 	x-init="
 	window.toast = function(message, options = {}){
@@ -101,9 +101,9 @@ templ AppHomePage(user models.User, csrfToken string) {
 			@UserDropdownMenu(user, csrfToken)
 		  </div>
 		</header>
-		<div class="w-screen h-screen overflow-scroll flex flex-col items-center">
-			<div class="w-[90%] max-h-[800px] overflow-scroll">
-				@ProjectsSection(csrfToken, user)
+		<div class="w-screen h-full flex flex-col items-center">
+			<div class="w-[90%] max-h-full">
+				@content
 			</div>
 		</div>
 	</body>

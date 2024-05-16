@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+
+	"github.com/google/go-github/v61/github"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -14,8 +17,11 @@ type ProjectFile struct {
 	Version uint `gorm:"not null;default:1"`
 	ProjectID uuid.UUID `gorm:"not null;type:uuid"`
 
-	EditorID uuid.UUID `gorm:"not null;type:uuid"`
+	EditorID uuid.UUID `gorm:"type:uuid"`
 	Editor User `gorm:"foreignKey:EditorID"`
+
+	CreatorID uuid.UUID `gorm:"not null;type:uuid"`
+	Creator User `gorm:"foreignKey:CreatorID"`
 
 	Reviewers []User `gorm:"many2many:project_file_reviewers"`
 }
@@ -23,4 +29,51 @@ type ProjectFile struct {
 func (pf *ProjectFile) BeforeCreate(tx *gorm.DB) (err error) {
 	pf.ID = uuid.New()
 	return err
+}
+
+func (p Project) GetFiles(db *gorm.DB) ([]ProjectFile, error) {
+	var files []ProjectFile
+
+	if err := db.Where("project_id = ?", p.ID).Preload("Creator").Preload("Editor").Preload("Reviewers").Find(&files).Error; err != nil {
+		return files, err
+	}
+
+	return files, nil
+}
+
+func (p Project) NewFile(filename string, state *AppState) error {
+	newFile := ProjectFile{
+		ID: uuid.New(),
+		Name: filename,
+		Path: p.DirectoryPath + filename,
+		Version: 1,
+		ProjectID: p.ID,
+		EditorID: state.User.ID,
+		CreatorID: state.User.ID,
+	}
+
+	return state.DB.Transaction(func(tx *gorm.DB) error {
+		gc := state.GitClient
+		ctx, owner, repo := gc.Context, gc.Owner, gc.Repo
+
+		if err := tx.Create(&newFile).Error; err != nil {
+			return err
+		}
+
+		branchRef := p.GetRefName()
+		commitMsg := fmt.Sprintf("%s created file %s", state.User.Username, newFile.Name)
+
+		_, _, createErr := gc.Client.Repositories.CreateFile(ctx, owner, repo, newFile.Path, &github.RepositoryContentFileOptions{
+			Message: &commitMsg,
+			Branch: branchRef,
+			Content: []byte{},
+		})
+
+		if createErr != nil {
+			tx.Rollback()
+			return createErr
+		}
+
+		return nil
+	})
 }
