@@ -65,6 +65,68 @@ func NewFile(c fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).SendString("Error while trying to fetch files for the project. Please Refresh")
 	}
+	token := csrf.TokenFromContext(c)
 
-	return renderer.RenderTempl(c, app.ProjectFilesList(files))
+	return renderer.RenderTempl(c, app.ProjectFilesList(files, token))
+}
+
+func AddReviewer(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+
+	var file models.ProjectFile
+	if err := state.DB.Preload("Reviewers").First(&file, fileID).Error; err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	reviewerEmail := c.FormValue("add-reviewer-email")
+	if reviewerEmail == "" {
+		return c.Status(400).SendString("No Email Address provided for reviewer")
+	}
+	
+	reviewer, err := models.GetUserByEmail(reviewerEmail, state.DB)
+	if err != nil {
+		return c.Status(400).SendString("No User found for the Email Address Provided")
+	}
+
+	if err := state.DB.Model(&file).Association("Reviewers").Append(&reviewer); err != nil {
+		return c.Status(500).SendString("Couldn't assign reviewer. Please try again.")
+	}
+	token := csrf.TokenFromContext(c)
+	return renderer.RenderTempl(c, app.ReviewersList(token, file))
+}
+
+func RemoveReviewer(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+
+	var file models.ProjectFile
+	if err := state.DB.Preload("Reviewers").First(&file, fileID).Error; err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	reviewerID, err := uuid.Parse(c.Params("reviewerId"))
+
+	if err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to remove invalid reviewer")
+	}
+
+	if err := state.DB.Model(&file).Association("Reviewers").Delete(&models.User{ID: reviewerID});err != nil {
+		return c.Status(500).SendString("Error while trying to remove reviewer")
+	}
+	token := csrf.TokenFromContext(c)
+	return renderer.RenderTempl(c, app.ReviewersList(token, file))
 }
