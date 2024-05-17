@@ -26,7 +26,7 @@ func GetFiles(c fiber.Ctx) error {
 		return c.Status(500).SendString("Invalid Project")
 	}
 
-	files, err := project.GetFiles(state.DB);
+	files, err := project.GetFiles(state.DB, state.User);
 	if err != nil {
 		return c.Status(500).SendString("Error while trying to fetch files for project")
 	}
@@ -61,7 +61,7 @@ func NewFile(c fiber.Ctx) error {
 		return c.Status(500).SendString("Unable to Create File. Please try Again")
 	}
 
-	files, err := project.GetFiles(state.DB)
+	files, err := project.GetFiles(state.DB, state.User)
 	if err != nil {
 		return c.Status(500).SendString("Error while trying to fetch files for the project. Please Refresh")
 	}
@@ -129,4 +129,36 @@ func RemoveReviewer(c fiber.Ctx) error {
 	}
 	token := csrf.TokenFromContext(c)
 	return renderer.RenderTempl(c, app.ReviewersList(token, file))
+}
+
+func AssignEditor(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+
+	var file models.ProjectFile
+	if err := state.DB.Preload("Reviewers").Preload("Editor").Preload("Creator").First(&file, fileID).Error; err != nil {
+		log.Error(err)
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	editorEmail := c.FormValue("editor-email")
+	if editorEmail == "" {
+		return c.Status(400).SendString("No Email Address provided for editor")
+	}
+	
+	editor, err := models.GetUserByEmail(editorEmail, state.DB)
+	if err != nil {
+		return c.Status(400).SendString("No User found for the Email Address Provided")
+	}
+	
+	if err := state.DB.Model(&file).Association("Editor").Append(&editor); err != nil {
+		return c.Status(500).SendString("Error while trying to assign Editor. Please try again.")
+	}
+	csrfToken := csrf.TokenFromContext(c)
+	return renderer.RenderTempl(c, app.ProjectFileListElement(file, csrfToken))
 }

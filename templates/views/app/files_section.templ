@@ -9,7 +9,9 @@ import (
 type Files []models.ProjectFile
 
 templ ProjectFileListElement(file models.ProjectFile, csrfToken string) {
-<tr x-data="{
+<tr id={
+fmt.Sprintf("file-%v", file.ID)
+} x-data="{
 showOptions: false,
 shareFileModal: false
 }" @mouseenter="showOptions=true" @mouseleave="if (!shareFileModal) {showOptions=false}" class="text-neutral-800 w-full hover:bg-gray-50 group h-12">
@@ -178,7 +180,12 @@ templ ShareFileModal(csrfToken string, file models.ProjectFile) {
                 </div>
                 <div class="relative w-auto flex flex-col">
                 <form class="flex flex-row overflow-y-scroll h-full w-full py-2 px-2 justify-between items-center"
-		 hx-target="this" hx-swap="none" 
+		hx-post={
+		fmt.Sprintf("/app/projects/files/%v/editor", file.ID)
+		}
+		 hx-target={
+		 fmt.Sprintf("#file-%v", file.ID)
+		 } hx-swap="outerHTML" 
 		@htmx:before-send="
 			$refs.saveBtn.innerHTML='Saving...'
 			$refs.saveBtn.disabled = true
@@ -214,6 +221,12 @@ templ ShareFileModal(csrfToken string, file models.ProjectFile) {
 		 hx-target={
 		 fmt.Sprintf("#file-%v-reviewers-list", file.ID)
 		 } hx-swap="outerHTML" 
+		@htmx:before-send="
+			$refs.addBtn.disabled = true
+		" 
+		@htmx:before-on-load="
+			$refs.addBtn.disabled = false
+		" 
 		@htmx:after-on-load="if ($event.detail.xhr.status === 200) { 
 		window.toast('Reviewer Added', {position: 'top-right', type: 'success'});
 		} 

@@ -31,16 +31,30 @@ func ProjectFileListElement(file models.ProjectFile, csrfToken string) templ.Com
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr x-data=\"{\nshowOptions: false,\nshareFileModal: false\n}\" @mouseenter=\"showOptions=true\" @mouseleave=\"if (!shareFileModal) {showOptions=false}\" class=\"text-neutral-800 w-full hover:bg-gray-50 group h-12\"><td class=\"px-5 py-2 text-sm font-medium whitespace-nowrap\"><div class=\"flex flex-row justify-start w-full items-center space-x-2\"><i data-lucide=\"file-text\" class=\"text-neutral-500 w-4 h-4\"></i> <span><a class=\"decoration-none hover:underline cursor-pointer\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("file-%v", file.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 19, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 13, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-data=\"{\nshowOptions: false,\nshareFileModal: false\n}\" @mouseenter=\"showOptions=true\" @mouseleave=\"if (!shareFileModal) {showOptions=false}\" class=\"text-neutral-800 w-full hover:bg-gray-50 group h-12\"><td class=\"px-5 py-2 text-sm font-medium whitespace-nowrap\"><div class=\"flex flex-row justify-start w-full items-center space-x-2\"><i data-lucide=\"file-text\" class=\"text-neutral-500 w-4 h-4\"></i> <span><a class=\"decoration-none hover:underline cursor-pointer\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 21, Col: 77}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -48,23 +62,10 @@ func ProjectFileListElement(file models.ProjectFile, csrfToken string) templ.Com
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v/%v/%v %v:%v", file.CreatedAt.Day(), int(file.CreatedAt.Month()), file.CreatedAt.Year(), file.CreatedAt.Hour(), file.CreatedAt.Minute()))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 22, Col: 221}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-5 py-2 text-center text-sm whitespace-nowrap\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(file.Creator.Username)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v/%v/%v %v:%v", file.CreatedAt.Day(), int(file.CreatedAt.Month()), file.CreatedAt.Year(), file.CreatedAt.Hour(), file.CreatedAt.Minute()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 23, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 24, Col: 221}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -75,29 +76,28 @@ func ProjectFileListElement(file models.ProjectFile, csrfToken string) templ.Com
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(file.Editor.Username)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(file.Creator.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 24, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 25, Col: 90}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-5 text-sm whitespace-nowrap text-right\"><div x-show=\"showOptions\" class=\"flex flex-row w-full justify-end items-center space-x-1.5\"><button hx-get=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-5 py-2 text-center text-sm whitespace-nowrap\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf(""))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(file.Editor.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 28, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 26, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#page-content\" hx-select=\"#page-content\" hx-swap=\"outerHTML\" @htmx:before-on-load=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-5 text-sm whitespace-nowrap text-right\"><div x-show=\"showOptions\" class=\"flex flex-row w-full justify-end items-center space-x-1.5\"><button hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,6 +108,20 @@ func ProjectFileListElement(file models.ProjectFile, csrfToken string) templ.Com
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 30, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#page-content\" hx-select=\"#page-content\" hx-swap=\"outerHTML\" @htmx:before-on-load=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf(""))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 32, Col: 17}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -138,9 +152,9 @@ func ProjectFilesList(files Files, csrfToken string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table id=\"files\" class=\"w-full divide-y divide-neutral-200 table-fixed mt-4\"><thead><tr class=\"text-neutral-500\"><th class=\"w-3/5 px-5 py-3 text-xs font-bold text-left uppercase\">Name</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-center uppercase\">Created At</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-center uppercase\">Created By</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-center uppercase\">Assigned Editor</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-right uppercase\"></th></tr></thead> <tbody class=\"divide-y divide-neutral-200\">")
@@ -172,21 +186,21 @@ func ProjectFilesSection(csrfToken string, files Files, project models.Project) 
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n	createFileModal: false\n	}\" class=\"w-full h-full flex flex-col items-start justify-start p-4\" id=\"page-content\"><div class=\"w-full flex flex-row justify-between items-center\"><div class=\"flex flex-row justify-center items-center space-x-1\"><button hx-get=\"/app\" hx-target=\"#page-content\" hx-swap=\"outerHTML\" hx-select=\"#page-content\" hx-push-url=\"true\" @htmx:after-on-load=\"packagesBundle.loadIcons()\" class=\"font-medium text-neutral-400 text-lg hover:bg-neutral-100 p-2 rounded-md cursor-pointer\">Your Projects</button> <i data-lucide=\"chevron-right\"></i> <href class=\"font-bold text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 76, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 78, Col: 49}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -225,22 +239,22 @@ func CreateFileModal(csrfToken string, project models.Project) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"createFileModal\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"createFileModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"createFileModal=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"createFileModal\" x-trap.inert.noscroll=\"createFileModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Create New File</h3><button @click=\"createFileModal=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\"><form class=\"flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("/app/projects/%v/files", project.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 117, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 119, Col: 51}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -248,13 +262,13 @@ func CreateFileModal(csrfToken string, project models.Project) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 133, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 135, Col: 61}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -277,49 +291,22 @@ func ShareFileModal(csrfToken string, file models.ProjectFile) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
+		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var15 == nil {
+			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"shareFileModal\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"shareFileModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"shareFileModal=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"shareFileModal\" x-trap.inert.noscroll=\"shareFileModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Manage File Access</h3><button @click=\"shareFileModal=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto flex flex-col\"><form class=\"flex flex-row overflow-y-scroll h-full w-full py-2 px-2 justify-between items-center\" hx-target=\"this\" hx-swap=\"none\" @htmx:before-send=\"\n			$refs.saveBtn.innerHTML=&#39;Saving...&#39;\n			$refs.saveBtn.disabled = true\n		\" @htmx:before-on-load=\"\n			$refs.saveBtn.innerHTML=&#39;Save&#39;\n			$refs.saveBtn.disabled = false\n		\" @htmx:after-on-load=\"if ($event.detail.xhr.status === 200) { \n		window.toast(&#39;Editor Updated&#39;, {position: &#39;top-right&#39;, type: &#39;success&#39;});\n		} \n		packagesBundle.loadIcons();\" hx-headers=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 195, Col: 61}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><label class=\"text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"new-file-name\">Editor</label> <input onkeyup=\"this.setCustomValidity(&#39;&#39;)\" hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;Editor Email cannot be empty&#39;)\n                    }\" class=\"flex w-[60%] h-8 px-3 py-4 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"editor-email\" id=\"editor-email\" placeholder=\"Editor Email Address\" type=\"email\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"shareFileModal\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"shareFileModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"shareFileModal=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"shareFileModal\" x-trap.inert.noscroll=\"shareFileModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Manage File Access</h3><button @click=\"shareFileModal=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto flex flex-col\"><form class=\"flex flex-row overflow-y-scroll h-full w-full py-2 px-2 justify-between items-center\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(file.Editor.Email)
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/app/projects/files/%v/editor", file.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 203, Col: 495}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 184, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button x-ref=\"saveBtn\" type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-300 disabled:text-neutral-700\">Save</button></form><div class=\"px-2 flex flex-col mt-4 w-full justify-start items-start\"><h4 class=\"font-semibold text-md\">Reviewers</h4><form class=\"flex flex-row overflow-y-scroll h-full w-full py-2 justify-between items-center space-x-4\" hx-post=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("/app/projects/files/%v/reviewers", file.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 212, Col: 59}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -327,27 +314,82 @@ func ShareFileModal(csrfToken string, file models.ProjectFile) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("#file-%v", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 187, Col: 35}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" @htmx:before-send=\"\n			$refs.saveBtn.innerHTML=&#39;Saving...&#39;\n			$refs.saveBtn.disabled = true\n		\" @htmx:before-on-load=\"\n			$refs.saveBtn.innerHTML=&#39;Save&#39;\n			$refs.saveBtn.disabled = false\n		\" @htmx:after-on-load=\"if ($event.detail.xhr.status === 200) { \n		window.toast(&#39;Editor Updated&#39;, {position: &#39;top-right&#39;, type: &#39;success&#39;});\n		} \n		packagesBundle.loadIcons();\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("#file-%v-reviewers-list", file.ID))
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 215, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 202, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" @htmx:after-on-load=\"if ($event.detail.xhr.status === 200) { \n		window.toast(&#39;Reviewer Added&#39;, {position: &#39;top-right&#39;, type: &#39;success&#39;});\n		} \n		packagesBundle.loadIcons();\n		$refs.reviewerEmailInput.value = &#39;&#39;\" hx-headers=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><label class=\"text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\" for=\"new-file-name\">Editor</label> <input onkeyup=\"this.setCustomValidity(&#39;&#39;)\" hx-on:htmx:validation:validate=\"if (this.value == &#39;&#39;) {\n                    this.setCustomValidity(&#39;Editor Email cannot be empty&#39;)\n                    }\" class=\"flex w-[60%] h-8 px-3 py-4 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50\" name=\"editor-email\" id=\"editor-email\" placeholder=\"Editor Email Address\" type=\"email\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(file.Editor.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 223, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 210, Col: 495}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button x-ref=\"saveBtn\" type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-300 disabled:text-neutral-700\">Save</button></form><div class=\"px-2 flex flex-col mt-4 w-full justify-start items-start\"><h4 class=\"font-semibold text-md\">Reviewers</h4><form class=\"flex flex-row overflow-y-scroll h-full w-full py-2 justify-between items-center space-x-4\" hx-post=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var20 string
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/app/projects/files/%v/reviewers", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 219, Col: 59}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var21 string
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("#file-%v-reviewers-list", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 222, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" @htmx:before-send=\"\n			$refs.addBtn.disabled = true\n		\" @htmx:before-on-load=\"\n			$refs.addBtn.disabled = false\n		\" @htmx:after-on-load=\"if ($event.detail.xhr.status === 200) { \n		window.toast(&#39;Reviewer Added&#39;, {position: &#39;top-right&#39;, type: &#39;success&#39;});\n		} \n		packagesBundle.loadIcons();\n		$refs.reviewerEmailInput.value = &#39;&#39;\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var22 string
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 236, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -378,22 +420,22 @@ func ReviewersList(csrfToken string, file models.ProjectFile) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var20 == nil {
-			templ_7745c5c3_Var20 = templ.NopComponent
+		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var23 == nil {
+			templ_7745c5c3_Var23 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("file-%v-reviewers-list", file.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 244, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 257, Col: 48}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -406,12 +448,12 @@ func ReviewersList(csrfToken string, file models.ProjectFile) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(reviewer.Username)
+			var templ_7745c5c3_Var25 string
+			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(reviewer.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 249, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 262, Col: 73}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -419,12 +461,12 @@ func ReviewersList(csrfToken string, file models.ProjectFile) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(reviewer.Email)
+			var templ_7745c5c3_Var26 string
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(reviewer.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 250, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 263, Col: 67}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -432,13 +474,13 @@ func ReviewersList(csrfToken string, file models.ProjectFile) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var24 string
-			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(
+			var templ_7745c5c3_Var27 string
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(
 				fmt.Sprintf("/app/projects/files/%v/reviewers/%v", file.ID, reviewer.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 256, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 269, Col: 77}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -446,13 +488,13 @@ func ReviewersList(csrfToken string, file models.ProjectFile) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var25 string
-			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(
+			var templ_7745c5c3_Var28 string
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(
 				fmt.Sprintf("#file-%v-reviewers-list", file.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 259, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 272, Col: 52}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -460,13 +502,13 @@ func ReviewersList(csrfToken string, file models.ProjectFile) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(
+			var templ_7745c5c3_Var29 string
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(
 				fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 266, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/files_section.templ`, Line: 279, Col: 63}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

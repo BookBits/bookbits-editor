@@ -35,6 +35,27 @@ func (u User) GetProjects(db *gorm.DB) ([]Project, error) {
 	var projects []Project
 
 	if u.Type == UserTypeWriter {
+		var reviewer_project_ids []uuid.UUID
+		
+		err := db.Table("project_file_reviewers").Joins("JOIN project_files ON project_file_reviewers.project_file_id=project_files.id").Where("project_file_reviewers.user_id = ?", u.ID).Select("project_id").Find(&reviewer_project_ids).Error;
+
+		if err != nil {
+			return projects, err
+		}
+		var editor_project_ids []uuid.UUID
+
+		err = db.Preload("Editor").Model(&ProjectFile{}).Where("editor_id = ?", u.ID).Select("project_id").Find(&editor_project_ids).Error
+		
+		if err != nil {
+			return projects, err
+		}
+
+		project_ids := append(reviewer_project_ids, editor_project_ids...)
+
+		if err := db.Preload("Creator").Find(&projects, &project_ids).Error; err != nil {
+			return projects, err
+		}
+
 		return projects, nil
 	}
 

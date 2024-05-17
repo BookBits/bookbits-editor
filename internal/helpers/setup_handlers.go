@@ -37,4 +37,5 @@ func SetupHandlers(app *fiber.App) {
 	app.Post("/app/projects/:pid/files", handlers.NewFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Post("/app/projects/files/:fid/reviewers", handlers.AddReviewer, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Delete("/app/projects/files/:fid/reviewers/:reviewerId", handlers.RemoveReviewer, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Post("/app/projects/files/:fid/editor", handlers.AssignEditor, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 }

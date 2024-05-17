@@ -31,8 +31,24 @@ func (pf *ProjectFile) BeforeCreate(tx *gorm.DB) (err error) {
 	return err
 }
 
-func (p Project) GetFiles(db *gorm.DB) ([]ProjectFile, error) {
+func (p Project) GetFiles(db *gorm.DB, u User) ([]ProjectFile, error) {
 	var files []ProjectFile
+	
+	if u.Type == UserTypeWriter {
+		var reviewerFiles []ProjectFile
+		
+		err := db.Unscoped().Table("project_file_reviewers").Joins("JOIN project_files ON project_file_reviewers.project_file_id=project_files.id").Where("project_file_reviewers.user_id = ? AND project_files.project_id = ?", u.ID, p.ID).Select("project_files.*").Preload("Creator").Preload("Editor").Preload("Reviewers").Find(&reviewerFiles).Error;
+
+		if err != nil {
+			return files, err
+		}
+
+		if err := db.Where("project_id = ? AND editor_id = ?", p.ID, u.ID).Preload("Creator").Preload("Editor").Preload("Reviewers").Find(&files).Error; err != nil {
+			return files, err
+		}
+
+		return append(files, reviewerFiles...), nil
+	}
 
 	if err := db.Where("project_id = ?", p.ID).Preload("Creator").Preload("Editor").Preload("Reviewers").Find(&files).Error; err != nil {
 		return files, err
