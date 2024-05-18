@@ -16,7 +16,7 @@ import (
 	"github.com/BookBits/bookbits-editor/internal/models"
 )
 
-func ProjectListElement(project models.Project) templ.Component {
+func ProjectListElement(project models.Project, user models.User, csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -96,7 +96,59 @@ func ProjectListElement(project models.Project) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#page-content\" hx-select=\"#page-content\" hx-swap=\"outerHTML\" hx-push-url=\"true\" @htmx:after-on-load=\"packagesBundle.loadIcons()\" class=\"flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200\"><i data-lucide=\"folder-open\" class=\"text-slate-500 w-4 h-4\"></i></button> <button class=\"flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200\"><i data-lucide=\"trash-2\" class=\"text-slate-500 w-4 h-4\"></i></button></div></td></tr>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#page-content\" hx-select=\"#page-content\" hx-swap=\"outerHTML\" hx-push-url=\"true\" @htmx:after-on-load=\"packagesBundle.loadIcons()\" class=\"flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200\"><i data-lucide=\"folder-open\" class=\"text-slate-500 w-4 h-4\"></i></button> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if user.Type != models.UserTypeWriter {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-delete=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(
+				fmt.Sprintf("/app/projects/%v", project.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/projects_section.templ`, Line: 31, Col: 45}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#projects\" hx-swap=\"outerHTML\" hx-trigger=\"click\" hx-headers=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(
+				fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/projects_section.templ`, Line: 35, Col: 61}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:before-send=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(
+				fmt.Sprintf("window.toast('Deleting Project %s', {position: 'top-right', type: 'success'})", project.Name))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/projects_section.templ`, Line: 38, Col: 108}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:after-on-load=\"if ($event.detail.xhr.status === 200) {window.toast(&#39;Project Deleted Successfully&#39;, {position: &#39;top-right&#39;, type: &#39;success&#39;});}\n		packagesBundle.loadIcons()\n		\" class=\"flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200\"><i data-lucide=\"trash-2\" class=\"text-slate-500 w-4 h-4\"></i></button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,7 +161,7 @@ func ProjectListElement(project models.Project) templ.Component {
 
 type Projects []models.Project
 
-func ProjectsList(projects Projects) templ.Component {
+func ProjectsList(projects Projects, user models.User, csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -117,9 +169,9 @@ func ProjectsList(projects Projects) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table x-data=\"{}\" id=\"projects\" class=\"w-full divide-y divide-neutral-200 table-fixed mt-4\"><thead><tr class=\"text-neutral-500\"><th class=\"w-3/5 px-5 py-3 text-xs font-bold text-left uppercase\">Name</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-center uppercase\">Created At</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-center uppercase\">Created By</th><th class=\"w-1/5 px-5 py-3 text-xs font-bold text-right uppercase\"></th></tr></thead> <tbody class=\"divide-y divide-neutral-200\">")
@@ -127,7 +179,7 @@ func ProjectsList(projects Projects) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, project := range projects {
-			templ_7745c5c3_Err = ProjectListElement(project).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ProjectListElement(project, user, csrfToken).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -151,9 +203,9 @@ func ProjectsSection(csrfToken string, user models.User, projects Projects) temp
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n	createProjectModal: false\n	}\" class=\"w-full h-full flex flex-col items-start justify-start p-4\" id=\"page-content\"><div class=\"w-full flex flex-row justify-between items-center\"><h5 class=\"font-bold text-lg p-2\">Your Projects</h5>")
@@ -174,7 +226,7 @@ func ProjectsSection(csrfToken string, user models.User, projects Projects) temp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ProjectsList(projects).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ProjectsList(projects, user, csrfToken).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -197,22 +249,22 @@ func CreateProjectModal(csrfToken string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"createProjectModal\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"createProjectModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"createProjectModal=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"createProjectModal\" x-trap.inert.noscroll=\"createProjectModal\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Create New Project</h3><button @click=\"createProjectModal=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\"><form class=\"flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2\" hx-post=\"/app/projects\" hx-target=\"#projects\" hx-swap=\"outerHTML\" @htmx:before-send=\"\n			$refs.createBtn.innerHTML=&#39;Creating...&#39;\n			$refs.createBtn.disabled = true\n		\" @htmx:before-on-load=\"\n			$refs.createBtn.innerHTML=&#39;Create&#39;\n			$refs.createBtn.disabled = false\n		\" @htmx:after-on-load=\"window.toast(&#39;Project Successfully Created&#39;, {position: &#39;top-right&#39;, type: &#39;success&#39;}); packagesBundle.loadIcons(); createProjectModal=false; $refs.projectNameInput.value=&#39;&#39;\" hx-headers=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/projects_section.templ`, Line: 113, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/projects_section.templ`, Line: 128, Col: 61}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

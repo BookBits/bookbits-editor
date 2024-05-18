@@ -8,7 +8,7 @@ import (
 
 type Files []models.ProjectFile
 
-templ ProjectFileListElement(file models.ProjectFile, csrfToken string) {
+templ ProjectFileListElement(file models.ProjectFile, csrfToken string, user models.User) {
 <tr id={
 fmt.Sprintf("file-%v", file.ID)
 } x-data="{
@@ -26,29 +26,44 @@ shareFileModal: false
         <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{file.Editor.Username}</td>
         <td class="px-5 text-sm whitespace-nowrap text-right">
 	<div x-show="showOptions" class="flex flex-row w-full justify-end items-center space-x-1.5">
-		<button hx-get={
-		fmt.Sprintf("")
-		} hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML" @htmx:before-on-load={
-		fmt.Sprintf("")
-		}
-		class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+		if user.Type == models.UserTypeAdmin || user.Type == models.UserTypeManager || file.EditorID == user.ID {
+		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
 			<i data-lucide="pencil" class="text-slate-500 w-4 h-4"></i>
+		</button>
+		}
+		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="eye" class="text-slate-500 w-4 h-4"></i>
 		</button>	
+		if user.Type != models.UserTypeWriter {
 		<div>
 		<button @click="shareFileModal=true" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
 			<i data-lucide="user-round-plus" class="text-slate-500 w-4 h-4"></i>
 		</button>
 		@ShareFileModal(csrfToken, file)
 		</div>
-		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+		<button
+		hx-delete={
+		fmt.Sprintf("/app/projects/files/%v", file.ID)
+		}
+		hx-target="#files" hx-swap="outerHTML" hx-trigger="click"
+		hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}
+		@htmx:before-send={
+		fmt.Sprintf("window.toast('Deleting File %s', {position: 'top-right', type: 'success'})", file.Name)}
+		@htmx:after-on-load="if ($event.detail.xhr.status === 200) {window.toast('File Deleted Successfully', {position: 'top-right', type: 'success'});}
+		packagesBundle.loadIcons();
+		"
+		class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
 			<i data-lucide="trash-2" class="text-slate-500 w-4 h-4"></i>
-		</button>	
+		</button>
+		}
 	</div>
 	</td>
 </tr>
 }
 
-templ ProjectFilesList(files Files, csrfToken string) {
+templ ProjectFilesList(files Files, csrfToken string, user models.User) {
 	<table id="files" class="w-full divide-y divide-neutral-200 table-fixed mt-4">
 		<thead>
 			<tr class="text-neutral-500">
@@ -61,13 +76,13 @@ templ ProjectFilesList(files Files, csrfToken string) {
 		</thead>
 		<tbody class="divide-y divide-neutral-200">
 			for _, file := range files {
-				@ProjectFileListElement(file, csrfToken)
+				@ProjectFileListElement(file, csrfToken, user)
 			}
 		</tbody>
 	</table>
 }
 
-templ ProjectFilesSection(csrfToken string, files Files, project models.Project) {
+templ ProjectFilesSection(csrfToken string, files Files, project models.Project, user models.User) {
 	<div x-data="{
 	createFileModal: false
 	}" class="w-full h-full flex flex-col items-start justify-start p-4" id="page-content">	
@@ -83,7 +98,7 @@ templ ProjectFilesSection(csrfToken string, files Files, project models.Project)
 			@CreateFileModal(csrfToken, project)
 		</div>
 		<div class="flex flex-col max-h-full w-full overflow-y-scroll">
-		@ProjectFilesList(files, csrfToken)
+		@ProjectFilesList(files, csrfToken, user)
 		</div>
 	</div>
 }

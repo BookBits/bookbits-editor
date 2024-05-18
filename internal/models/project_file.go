@@ -6,6 +6,7 @@ import (
 	"github.com/google/go-github/v61/github"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ProjectFile struct {
@@ -15,7 +16,9 @@ type ProjectFile struct {
 	Name string `gorm:"not null"`
 	Path string `gorm:"not null"`
 	Version uint `gorm:"not null;default:1"`
+
 	ProjectID uuid.UUID `gorm:"not null;type:uuid"`
+	Project Project `gorm:"foreignKey:ProjectID"`
 
 	EditorID uuid.UUID `gorm:"type:uuid"`
 	Editor User `gorm:"foreignKey:EditorID"`
@@ -88,6 +91,52 @@ func (p Project) NewFile(filename string, state *AppState) error {
 		if createErr != nil {
 			tx.Rollback()
 			return createErr
+		}
+
+		return nil
+	})
+}
+
+func (pf ProjectFile) GetSHA(state *AppState) (string, error) {
+	gc := state.GitClient
+	ctx, owner, repo := gc.Context, gc.Owner, gc.Repo
+
+	contents, _, _, err := gc.Client.Repositories.GetContents(ctx, owner, repo, pf.Path, &github.RepositoryContentGetOptions{
+		Ref: *pf.Project.GetRefName(),
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return *contents.SHA, nil
+}
+
+func (pf ProjectFile) Delete(state *AppState) error {
+	gc := state.GitClient
+	ctx, owner, repo := gc.Context, gc.Owner, gc.Repo
+	return state.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Unscoped().Select(clause.Associations).Delete(&pf).Error; err != nil {
+			return err
+		}
+
+		sha, err := pf.GetSHA(state)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		commitMsg := fmt.Sprintf("%v deleted %v", state.User.Username, pf.Name)
+		
+		_, _, deleteErr := gc.Client.Repositories.DeleteFile(ctx, owner, repo, pf.Path, &github.RepositoryContentFileOptions{
+			Message: &commitMsg,
+			Branch: pf.Project.GetRefName(),
+			SHA: &sha,
+		})
+
+		if deleteErr != nil {
+			tx.Rollback()
+			return deleteErr
 		}
 
 		return nil

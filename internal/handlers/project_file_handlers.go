@@ -32,7 +32,7 @@ func GetFiles(c fiber.Ctx) error {
 	}
 	
 	csrfToken := csrf.TokenFromContext(c)
-	content := app.ProjectFilesSection(csrfToken, files, project)
+	content := app.ProjectFilesSection(csrfToken, files, project, state.User)
 	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, fmt.Sprintf("%v | Bookbits Editor", project.Name), content))
 }
 
@@ -67,7 +67,7 @@ func NewFile(c fiber.Ctx) error {
 	}
 	token := csrf.TokenFromContext(c)
 
-	return renderer.RenderTempl(c, app.ProjectFilesList(files, token))
+	return renderer.RenderTempl(c, app.ProjectFilesList(files, token, state.User))
 }
 
 func AddReviewer(c fiber.Ctx) error {
@@ -93,6 +93,10 @@ func AddReviewer(c fiber.Ctx) error {
 	reviewer, err := models.GetUserByEmail(reviewerEmail, state.DB)
 	if err != nil {
 		return c.Status(400).SendString("No User found for the Email Address Provided")
+	}
+
+	if file.EditorID == reviewer.ID {
+		return c.Status(400).SendString("User already assigned as editor")
 	}
 
 	if err := state.DB.Model(&file).Association("Reviewers").Append(&reviewer); err != nil {
@@ -136,13 +140,11 @@ func AssignEditor(c fiber.Ctx) error {
 	fileID, err := uuid.Parse(c.Params("fid"))
 
 	if err != nil {
-		log.Error(err)
 		return c.Status(400).SendString("Trying to modify invalid file")
 	}
 
 	var file models.ProjectFile
 	if err := state.DB.Preload("Reviewers").Preload("Editor").Preload("Creator").First(&file, fileID).Error; err != nil {
-		log.Error(err)
 		return c.Status(400).SendString("Trying to modify invalid file")
 	}
 	
@@ -160,5 +162,38 @@ func AssignEditor(c fiber.Ctx) error {
 		return c.Status(500).SendString("Error while trying to assign Editor. Please try again.")
 	}
 	csrfToken := csrf.TokenFromContext(c)
-	return renderer.RenderTempl(c, app.ProjectFileListElement(file, csrfToken))
+	return renderer.RenderTempl(c, app.ProjectFileListElement(file, csrfToken, state.User))
+}
+
+func DeleteFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	
+	if state.User.Type == models.UserTypeWriter {
+		return c.SendStatus(401)
+	}
+
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+
+	if err := file.Delete(state); err != nil {
+		log.Error(err)
+		return c.Status(500).SendString("Error while trying to Delete File")
+	}
+
+	updatedFiles, err := file.Project.GetFiles(state.DB, state.User)
+	if err != nil {
+		return c.Status(500).SendString("Unable to fetch updated files.")
+	}
+
+	csrfToken := csrf.TokenFromContext(c)
+
+	return renderer.RenderTempl(c, app.ProjectFilesList(updatedFiles, csrfToken, state.User))
 }

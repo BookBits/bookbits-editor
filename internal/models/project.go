@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-github/v61/github"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Project struct {
@@ -114,6 +115,37 @@ func NewProject(name string, db *gorm.DB, gc GitClient, creatorID uuid.UUID) err
 			return commitErr
 		}
 
+		return nil
+	})
+}
+
+func (p Project) Delete(state *AppState) error {
+	gc := state.GitClient
+	ctx, owner, repo := gc.Context, gc.Owner, gc.Repo
+	return state.DB.Transaction(func(tx *gorm.DB) error {
+		var files []ProjectFile
+
+		if err := tx.Where("project_id = ?", p.ID).Preload("Creator").Preload("Editor").Preload("Reviewers").Preload("Project").Find(&files).Error; err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			if err := file.Delete(state); err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Unscoped().Select(clause.Associations).Delete(&p).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		_, delErr := gc.Client.Git.DeleteRef(ctx, owner, repo, *p.GetRefName())
+
+		if delErr != nil {
+			tx.Rollback()
+			return delErr
+		}
 		return nil
 	})
 }

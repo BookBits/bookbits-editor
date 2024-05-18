@@ -6,7 +6,7 @@ import (
 	"github.com/BookBits/bookbits-editor/internal/models"
 )
 
-templ ProjectListElement(project models.Project) {
+templ ProjectListElement(project models.Project, user models.User, csrfToken string) {
 <tr x-data="{showOptions: false}" @mouseenter="showOptions=true" @mouseleave="showOptions=false" class="text-neutral-800 w-full hover:bg-gray-50 group h-12">
         <td class="px-5 py-2 text-sm font-medium whitespace-nowrap">
 	<div class="flex flex-row justify-start w-full items-center space-x-2">
@@ -24,10 +24,25 @@ templ ProjectListElement(project models.Project) {
 		fmt.Sprintf("/app/projects/%v/files", project.ID)
 		} hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
 			<i data-lucide="folder-open" class="text-slate-500 w-4 h-4"></i>
-		</button>	
-		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+		</button>
+		if user.Type != models.UserTypeWriter {
+		<button 
+		hx-delete={
+		fmt.Sprintf("/app/projects/%v", project.ID)
+		}
+		hx-target="#projects" hx-swap="outerHTML" hx-trigger="click"
+		hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}
+		@htmx:before-send={
+		fmt.Sprintf("window.toast('Deleting Project %s', {position: 'top-right', type: 'success'})", project.Name)}
+		@htmx:after-on-load="if ($event.detail.xhr.status === 200) {window.toast('Project Deleted Successfully', {position: 'top-right', type: 'success'});}
+		packagesBundle.loadIcons()
+		"
+		class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
 			<i data-lucide="trash-2" class="text-slate-500 w-4 h-4"></i>
-		</button>	
+		</button>
+		}
 	</div>
 	</td>
 </tr>
@@ -35,7 +50,7 @@ templ ProjectListElement(project models.Project) {
 
 type Projects []models.Project
 
-templ ProjectsList(projects Projects) {
+templ ProjectsList(projects Projects, user models.User, csrfToken string) {
 	<table x-data="{}" id="projects" class="w-full divide-y divide-neutral-200 table-fixed mt-4">
 		<thead>
 			<tr class="text-neutral-500">
@@ -47,7 +62,7 @@ templ ProjectsList(projects Projects) {
 		</thead>
 		<tbody class="divide-y divide-neutral-200">
 			for _, project := range projects {
-				@ProjectListElement(project)
+				@ProjectListElement(project, user, csrfToken)
 			}
 		</tbody>
 	</table>
@@ -67,7 +82,7 @@ templ ProjectsSection(csrfToken string, user models.User, projects Projects) {
 			}
 		</div>
 		<div class="flex flex-col max-h-full w-full overflow-y-scroll">
-			@ProjectsList(projects)
+			@ProjectsList(projects, user, csrfToken)
 		</div>
 	</div>
 }

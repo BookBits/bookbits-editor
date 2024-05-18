@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserType string
@@ -154,7 +155,7 @@ func CreateUserWithPassword(username string, email string, password string, user
 }
 
 func DeleteUserByID(id uuid.UUID, db *gorm.DB) error {
-	err := db.Unscoped().Delete(&User{}, id).Error
+	err := db.Unscoped().Select(clause.Associations).Delete(&User{}, id).Error
 	return err
 }
 

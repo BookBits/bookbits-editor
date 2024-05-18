@@ -32,10 +32,12 @@ func SetupHandlers(app *fiber.App) {
 		return c.Redirect().To("/app")
 		}, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Post("/app/projects", handlers.CreateProject, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Delete("/app/projects/:pid", handlers.DeleteProject, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 
 	app.Get("/app/projects/:pid/files", handlers.GetFiles, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Post("/app/projects/:pid/files", handlers.NewFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Post("/app/projects/files/:fid/reviewers", handlers.AddReviewer, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Delete("/app/projects/files/:fid/reviewers/:reviewerId", handlers.RemoveReviewer, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Post("/app/projects/files/:fid/editor", handlers.AssignEditor, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Delete("/app/projects/files/:fid", handlers.DeleteFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 }
