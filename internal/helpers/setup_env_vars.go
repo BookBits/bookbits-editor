@@ -74,6 +74,42 @@ func SetupEnvVars() (models.EnvVars, error) {
 		return models.EnvVars{}, errors.New("Missing Env Var")
 	}
 
+	git_repo := os.Getenv("GIT_REPO")
+	if git_repo == "" {
+		log.Fatal("GIT_REPO not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
+	git_owner := os.Getenv("GIT_OWNER")
+	if git_owner == "" {
+		log.Fatal("GIT_OWNER not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
+	git_token := os.Getenv("GIT_TOKEN")
+	if git_token == "" {
+		log.Fatal("GIT_TOKEN not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
+	redis_port := os.Getenv("REDIS_PORT")
+	if redis_port == "" {
+		log.Fatal("REDIS_PORT not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
+	redis_addr := os.Getenv("REDIS_ADDR")
+	if redis_addr == "" {
+		log.Fatal("REDIS_ADDR not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
+	redis_password := os.Getenv("REDIS_PASSWORD")
+	if redis_password == "" {
+		log.Fatal("REDIS_PASSWORD not provided")
+		return models.EnvVars{}, errors.New("Missing Env Var")
+	}
+
 	return models.EnvVars{
 		Port: port,
 		DbPort: db_port,
@@ -84,5 +120,11 @@ func SetupEnvVars() (models.EnvVars, error) {
 		JWTSecretKey: []byte(jwt_secret_key),
 		DefaultAdminUserEmail: default_admin_user_email,
 		DefaultAdminPassword: default_admin_user_password,
+		GitRepo: git_repo,
+		GitOwner: git_owner,
+		GitToken: git_token,
+		RedisPort: redis_port,
+		RedisAddr: redis_addr,
+		RedisPassword: redis_password,
 	}, nil
 }

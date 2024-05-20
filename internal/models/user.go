@@ -10,13 +10,14 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserType string
 
 const (
   UserTypeAdmin   UserType = "admin"
-  UserTypeReviewer UserType = "reviewer"
+  UserTypeManager UserType = "manager"
   UserTypeWriter  UserType = "writer"
 )
 
@@ -24,8 +25,8 @@ func (ut UserType) ToString() string {
 	switch ut {
 	case UserTypeAdmin:
 		return "Admin"
-	case UserTypeReviewer:
-		return "Reviewer"
+	case UserTypeManager:
+		return "Manager"
 	case UserTypeWriter:
 		return "Writer"
 	}
@@ -36,11 +37,11 @@ type User struct {
 	gorm.Model
 
 	ID uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;"`
-	Username string `json:"username"`
-	Email string `json:"email" gorm:"unique"`
-	PasswordHash []byte `json:"-"`
-	PasswordSalt []byte `json:"-"`
-	Type UserType `json:"user_type"`
+	Username string `json:"username" gorm:"not null"`
+	Email string `json:"email" gorm:"unique;not null"`
+	PasswordHash []byte `json:"-" gorm:"not null"`
+	PasswordSalt []byte `json:"-" gorm:"not null"`
+	Type UserType `json:"user_type" gorm:"not null"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
@@ -119,7 +120,7 @@ func GetUserByID(id uuid.UUID, db *gorm.DB) (User, error) {
 
 func GetUserByEmail(email string, db *gorm.DB) (User, error) {
 	var user User
-	err := db.Where("email = ?", email).Find(&user).Error
+	err := db.Where("email = ?", email).First(&user).Error
 	return user, err
 }
 
@@ -154,7 +155,7 @@ func CreateUserWithPassword(username string, email string, password string, user
 }
 
 func DeleteUserByID(id uuid.UUID, db *gorm.DB) error {
-	err := db.Unscoped().Delete(&User{}, id).Error
+	err := db.Unscoped().Select(clause.Associations).Delete(&User{}, id).Error
 	return err
 }
 

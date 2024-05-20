@@ -33,10 +33,6 @@ templ UserDropdownMenu(user models.User, csrfToken string) {
         <div class="p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700">
             <div class="px-2 py-1.5 text-sm font-semibold">My Account</div>
             <div class="h-px my-1 -mx-1 bg-neutral-200"></div>
-            <button class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-				<i data-lucide="user-round" class="h-4 w-4 text-neutral-500"></i>
-                <span>Profile</span>
-            </button>
 			if user.Type == models.UserTypeAdmin {
             <button @click="modalOpen=true" class="relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
 				<i data-lucide="wrench" class="h-4 w-4 text-neutral-500"></i>
@@ -62,17 +58,17 @@ templ UserDropdownMenu(user models.User, csrfToken string) {
 </div>
 }
 
-templ AppHomePage(user models.User, csrfToken string) {
+templ AppHomePage(user models.User, csrfToken string, title string, content templ.Component) {
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Dashboard | Bookbits Editor</title>
+		<title>{title}</title>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<script src="/static/bundle-packages.js" defer></script>
-		<script src="/static/bundle-app.js"></script>
 	</head>
-	<body x-data="{}"
+	<script src="/static/bundle-packages.js" defer></script>
+	<script src="/static/bundle-app.js"></script>
+	<body class="w-screen h-screen flex flex-col overflow-hidden" x-data="{}"
 	x-init="
 	window.toast = function(message, options = {}){
                 let description = '';
@@ -105,6 +101,11 @@ templ AppHomePage(user models.User, csrfToken string) {
 			@UserDropdownMenu(user, csrfToken)
 		  </div>
 		</header>
+		<div class="w-full h-full flex flex-col items-center overflow-hidden">
+			<div class="w-[90%] h-full overflow-auto">
+				@content
+			</div>
+		</div>
 	</body>
 </html>
 }

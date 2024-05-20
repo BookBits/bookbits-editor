@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	.editor-menu .menu-button {
+		@apply px-3 py-1.5 h-full bg-white hover:bg-neutral-100
+	}
+
+	.editor-menu .menu-button.is-active {
+		@apply text-blue-600
+	}
+
+	.editor-container .tiptap {
+		font-family: Georgia, serif;
+		@apply outline-none h-full max-h-[100%] overflow-auto;
+
+		h1 {
+			@apply text-2xl;
+		}
+
+		h2 {
+			@apply text-xl;
+		}
+
+		ul {
+			@apply list-disc
+		}
+
+		ol {
+			@apply list-decimal
+		}
+
+		ol, ul {
+			@apply pl-4
+		}
+
+		blockquote {
+			@apply pl-4 border-l border-l-4 border-neutral-300
+		}
+	}
+}

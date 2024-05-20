@@ -56,7 +56,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></span> <i data-lucide=\"chevron-down\" class=\"absolute right-0 w-5 h-5 mr-3\"></i></button><div x-show=\"dropdownOpen\" @click.away=\"dropdownOpen=false\" x-transition:enter=\"ease-out duration-200\" x-transition:enter-start=\"-translate-y-2\" x-transition:enter-end=\"translate-y-0\" class=\"absolute top-0 z-50 w-56 mt-12 -translate-x-1/2 left-1/2\" x-cloak><div class=\"p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700\"><div class=\"px-2 py-1.5 text-sm font-semibold\">My Account</div><div class=\"h-px my-1 -mx-1 bg-neutral-200\"></div><button class=\"relative flex w-full space-x-2 cursor-default select-none hover:bg-neutral-100 items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50\"><i data-lucide=\"user-round\" class=\"h-4 w-4 text-neutral-500\"></i> <span>Profile</span></button> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></span> <i data-lucide=\"chevron-down\" class=\"absolute right-0 w-5 h-5 mr-3\"></i></button><div x-show=\"dropdownOpen\" @click.away=\"dropdownOpen=false\" x-transition:enter=\"ease-out duration-200\" x-transition:enter-start=\"-translate-y-2\" x-transition:enter-end=\"translate-y-0\" class=\"absolute top-0 z-50 w-56 mt-12 -translate-x-1/2 left-1/2\" x-cloak><div class=\"p-1 mt-1 bg-white border rounded-md shadow-md border-neutral-200/70 text-neutral-700\"><div class=\"px-2 py-1.5 text-sm font-semibold\">My Account</div><div class=\"h-px my-1 -mx-1 bg-neutral-200\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,7 +86,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 54, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 50, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -103,7 +103,7 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 	})
 }
 
-func AppHomePage(user models.User, csrfToken string) templ.Component {
+func AppHomePage(user models.User, csrfToken string, title string, content templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -116,7 +116,20 @@ func AppHomePage(user models.User, csrfToken string) templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Dashboard | Bookbits Editor</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script></head><body x-data=\"{}\" x-init=\"\n	window.toast = function(message, options = {}){\n                let description = &#39;&#39;;\n                let type = &#39;default&#39;;\n                let position = &#39;top-center&#39;;\n                let html = &#39;&#39;;\n                if(typeof options.description != &#39;undefined&#39;) description = options.description;\n                if(typeof options.type != &#39;undefined&#39;) type = options.type;\n                if(typeof options.position != &#39;undefined&#39;) position = options.position;\n                if(typeof options.html != &#39;undefined&#39;) html = options.html;\n                \n                window.dispatchEvent(new CustomEvent(&#39;toast-show&#39;, { detail : { type: type, message: message, description: description, position : position, html: html }}));\n            }\n	\" @htmx:response-error.window=\"window.toast($event.detail.xhr.responseText, {\n                        position: &#39;top-right&#39;,\n                        type: &#39;danger&#39;\n                })\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 65, Col: 15}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script><body class=\"w-screen h-screen flex flex-col overflow-hidden\" x-data=\"{}\" x-init=\"\n	window.toast = function(message, options = {}){\n                let description = &#39;&#39;;\n                let type = &#39;default&#39;;\n                let position = &#39;top-center&#39;;\n                let html = &#39;&#39;;\n                if(typeof options.description != &#39;undefined&#39;) description = options.description;\n                if(typeof options.type != &#39;undefined&#39;) type = options.type;\n                if(typeof options.position != &#39;undefined&#39;) position = options.position;\n                if(typeof options.html != &#39;undefined&#39;) html = options.html;\n                \n                window.dispatchEvent(new CustomEvent(&#39;toast-show&#39;, { detail : { type: type, message: message, description: description, position : position, html: html }}));\n            }\n	\" @htmx:response-error.window=\"window.toast($event.detail.xhr.responseText, {\n                        position: &#39;top-right&#39;,\n                        type: &#39;danger&#39;\n                })\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -132,7 +145,15 @@ func AppHomePage(user models.User, csrfToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header><div class=\"w-full h-full flex flex-col items-center overflow-hidden\"><div class=\"w-[90%] h-full overflow-auto\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = content.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

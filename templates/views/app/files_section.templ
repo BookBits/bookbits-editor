@@ -1,0 +1,305 @@
+package app
+
+import (
+	"fmt"
+
+	"github.com/BookBits/bookbits-editor/internal/models"
+)
+
+type Files []models.ProjectFile
+
+templ ProjectFileListElement(file models.ProjectFile, csrfToken string, user models.User) {
+<tr id={
+fmt.Sprintf("file-%v", file.ID)
+} x-data="{
+showOptions: false,
+shareFileModal: false
+}" @mouseenter="showOptions=true" @mouseleave="if (!shareFileModal) {showOptions=false}" class="text-neutral-800 w-full hover:bg-gray-50 group h-12">
+        <td class="px-5 py-2 text-sm font-medium whitespace-nowrap">
+	<div class="flex flex-row justify-start w-full items-center space-x-2">
+		<i data-lucide="file-text" class="text-neutral-500 w-4 h-4"></i>
+		<span><a class="decoration-none hover:underline cursor-pointer">{ file.Name }</a></span>
+	</div>
+	</td>
+        <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{ fmt.Sprintf("%v/%v/%v %v:%v", file.CreatedAt.Day(), int(file.CreatedAt.Month()), file.CreatedAt.Year(), file.CreatedAt.Hour(), file.CreatedAt.Minute()) }</td>
+        <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{file.Creator.Username}</td>
+        <td class="px-5 py-2 text-center text-sm whitespace-nowrap">{file.Editor.Username}</td>
+        <td class="px-5 text-sm whitespace-nowrap text-right">
+	<div x-show="showOptions" class="flex flex-row w-full justify-end items-center space-x-1.5">
+		if user.Type == models.UserTypeAdmin || user.Type == models.UserTypeManager || file.EditorID == user.ID {
+		<button hx-get={
+		fmt.Sprintf("/app/projects/files/%v/edit", file.ID)
+		} hx-target="#page-content" hx-swap="outerHTML" hx-select="#page-content" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="pencil" class="text-slate-500 w-4 h-4"></i>
+		</button>
+		}
+		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="eye" class="text-slate-500 w-4 h-4"></i>
+		</button>	
+		if user.Type != models.UserTypeWriter {
+		<div>
+		<button @click="shareFileModal=true" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="user-round-plus" class="text-slate-500 w-4 h-4"></i>
+		</button>
+		@ShareFileModal(csrfToken, file)
+		</div>
+		<button
+		hx-delete={
+		fmt.Sprintf("/app/projects/files/%v", file.ID)
+		}
+		hx-target="#files" hx-swap="outerHTML" hx-trigger="click"
+		hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}
+		@htmx:before-send={
+		fmt.Sprintf("window.toast('Deleting File %s', {position: 'top-right', type: 'success'})", file.Name)}
+		@htmx:after-on-load="if ($event.detail.xhr.status === 200) {window.toast('File Deleted Successfully', {position: 'top-right', type: 'success'});}
+		packagesBundle.loadIcons();
+		"
+		class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+			<i data-lucide="trash-2" class="text-slate-500 w-4 h-4"></i>
+		</button>
+		}
+	</div>
+	</td>
+</tr>
+}
+
+templ ProjectFilesList(files Files, csrfToken string, user models.User) {
+	<table id="files" class="w-full divide-y divide-neutral-200 table-fixed mt-4">
+		<thead>
+			<tr class="text-neutral-500">
+				<th class="w-3/5 px-5 py-3 text-xs font-bold text-left uppercase">Name</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-center uppercase">Created At</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-center uppercase">Created By</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-center uppercase">Assigned Editor</th>
+				<th class="w-1/5 px-5 py-3 text-xs font-bold text-right uppercase"></th>
+			</tr>
+		</thead>
+		<tbody class="divide-y divide-neutral-200">
+			for _, file := range files {
+				@ProjectFileListElement(file, csrfToken, user)
+			}
+		</tbody>
+	</table>
+}
+
+templ ProjectFilesSection(csrfToken string, files Files, project models.Project, user models.User) {
+	<div x-data="{
+	createFileModal: false
+	}" class="w-full h-full flex flex-col items-start justify-start p-4" id="page-content">	
+		<div class="w-full flex flex-row justify-between items-center">
+			<div class="flex flex-row justify-center items-center space-x-1">
+				<button hx-get="/app" hx-target="#page-content" hx-swap="outerHTML" hx-select="#page-content" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="font-medium text-neutral-400 text-lg hover:bg-neutral-100 p-2 rounded-md cursor-pointer">Your Projects</button>
+				<i data-lucide="chevron-right"></i>
+				<href class="font-bold text-lg">{project.Name}</href>
+			</div>
+			<button @click="createFileModal=true" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
+				<i data-lucide="file-plus-2" class="text-white h-4 w-4 mr-2"></i> <span>New File</span>
+			</button>
+			@CreateFileModal(csrfToken, project)
+		</div>
+		<div class="flex flex-col max-h-full w-full overflow-y-scroll">
+		@ProjectFilesList(files, csrfToken, user)
+		</div>
+	</div>
+}
+
+templ CreateFileModal(csrfToken string, project models.Project) {
+        <div x-show="createFileModal" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="createFileModal" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="createFileModal=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="createFileModal"
+                x-trap.inert.noscroll="createFileModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Create New File</h3>
+                    <button @click="createFileModal=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto">
+                <form class="flex flex-col overflow-y-scroll h-full w-full pt-2 pr-2"
+		hx-post={
+		fmt.Sprintf("/app/projects/%v/files", project.ID)
+		} hx-target="#files" hx-swap="outerHTML" 
+		@htmx:before-send="
+			$refs.createBtn.innerHTML='Creating...'
+			$refs.createBtn.disabled = true
+		" 
+		@htmx:before-on-load="
+			$refs.createBtn.innerHTML='Create'
+			$refs.createBtn.disabled = false
+		" 
+		@htmx:after-on-load="if ($event.detail.xhr.status === 200) { 
+		window.toast('File Successfully Created', {position: 'top-right', type: 'success'});
+		} 
+		packagesBundle.loadIcons();
+		createFileModal=false; $refs.fileNameInput.value=''"
+                hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}>
+                <div class="grid gap-x-2 gap-y-4">
+                    <div class="grid items-center grid-cols-3 gap-4"><label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="new-file-name">New File Name</label><input 
+                    onkeyup="this.setCustomValidity('')"
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('file name cannot be empty')
+                    }"
+                    class="flex w-full h-8 col-span-2 px-3 py-2 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="new-file-name" id="new-file-name" x-ref="fileNameInput" placeholder="Enter New File Name" type="text" /></div>
+                </div>
+                <div class="flex flex-row w-full justify-end items-center mt-6 space-x-2 p-2">
+                <button x-ref="createBtn" type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-300 disabled:text-neutral-700">
+                        Create
+                </button>
+                </div>
+                </form>
+                </div>
+            </div>
+        </div>
+}
+
+templ ShareFileModal(csrfToken string, file models.ProjectFile) {
+        <div x-show="shareFileModal" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="shareFileModal" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="shareFileModal=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="shareFileModal"
+                x-trap.inert.noscroll="shareFileModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Manage File Access</h3>
+                    <button @click="shareFileModal=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto flex flex-col">
+                <form class="flex flex-row overflow-y-scroll h-full w-full py-2 px-2 justify-between items-center"
+		hx-post={
+		fmt.Sprintf("/app/projects/files/%v/editor", file.ID)
+		}
+		 hx-target={
+		 fmt.Sprintf("#file-%v", file.ID)
+		 } hx-swap="outerHTML" 
+		@htmx:before-send="
+			$refs.saveBtn.innerHTML='Saving...'
+			$refs.saveBtn.disabled = true
+		" 
+		@htmx:before-on-load="
+			$refs.saveBtn.innerHTML='Save'
+			$refs.saveBtn.disabled = false
+		" 
+		@htmx:after-on-load="if ($event.detail.xhr.status === 200) { 
+		window.toast('Editor Updated', {position: 'top-right', type: 'success'});
+		} 
+		packagesBundle.loadIcons();"
+                hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}>
+                    <label class="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="new-file-name">Editor</label>
+		    <input 
+                    onkeyup="this.setCustomValidity('')"
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('Editor Email cannot be empty')
+                    }"
+                    class="flex w-[60%] h-8 px-3 py-4 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="editor-email" id="editor-email" placeholder="Editor Email Address" type="email" value={file.Editor.Email} />
+                <button x-ref="saveBtn" type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-300 disabled:text-neutral-700">
+                        Save
+                </button>
+                </form>
+		<div class="px-2 flex flex-col mt-4 w-full justify-start items-start">
+		<h4 class="font-semibold text-md">Reviewers</h4>
+                <form class="flex flex-row overflow-y-scroll h-full w-full py-2 justify-between items-center space-x-4"
+		hx-post={
+			fmt.Sprintf("/app/projects/files/%v/reviewers", file.ID)
+		}
+		 hx-target={
+		 fmt.Sprintf("#file-%v-reviewers-list", file.ID)
+		 } hx-swap="outerHTML" 
+		@htmx:before-send="
+			$refs.addBtn.disabled = true
+		" 
+		@htmx:before-on-load="
+			$refs.addBtn.disabled = false
+		" 
+		@htmx:after-on-load="if ($event.detail.xhr.status === 200) { 
+		window.toast('Reviewer Added', {position: 'top-right', type: 'success'});
+		} 
+		packagesBundle.loadIcons();
+		$refs.reviewerEmailInput.value = ''"
+                hx-headers={
+		        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+		}>
+		    <input 
+                    onkeyup="this.setCustomValidity('')"
+                    hx-on:htmx:validation:validate="if (this.value == '') {
+                    this.setCustomValidity('Reviewer Email cannot be empty')
+                    }"
+                    class="ml-1 flex w-full h-8 px-3 py-4 text-sm bg-transparent border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" name="add-reviewer-email" id="add-reviewer-email" x-ref="reviewerEmailInput" placeholder="Reviewer Email Address" type="email" />
+                <button x-ref="addBtn" type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
+                        <i data-lucide="user-round-plus" class="mr-2 text-neutral-500 w-4 h-4"></i><span>Add</span>
+                </button>
+                </form>
+		@ReviewersList(csrfToken, file)
+		</div>
+                </div>
+            </div>
+        </div>
+}
+
+templ ReviewersList(csrfToken string, file models.ProjectFile) {
+		<div id={
+		fmt.Sprintf("file-%v-reviewers-list", file.ID)
+		} class="flex flex-col w-full">
+		for _, reviewer := range file.Reviewers {
+		<div class="flex flex-row p-4 w-full justify-between items-center border-b-neutral-300 border-1">
+			<div class="flex flex-col h-full justify-center items-start">
+				<h5 class="text-neutral-700 text-md font-semibold">{reviewer.Username}</h5>
+				<p class="text-sm font-medium text-neutral-400">{reviewer.Email}</p>
+			</div>	
+			<div class="flex flex-col h-full justify-center items-start">
+				<button
+				hx-trigger="click"
+				hx-delete={
+					fmt.Sprintf("/app/projects/files/%v/reviewers/%v", file.ID, reviewer.ID)
+				}
+				 hx-target={
+				 fmt.Sprintf("#file-%v-reviewers-list", file.ID)
+				 } hx-swap="outerHTML" 
+				@htmx:after-on-load="if ($event.detail.xhr.status === 200) { 
+				window.toast('Reviewer Removed', {position: 'top-right', type: 'success'});
+				} 
+				packagesBundle.loadIcons();"
+                		hx-headers={
+				        fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+				}
+				class="flex items-center justify-center w-10 h-10 bg-white rounded-full cursor-pointer hover:bg-neutral-100 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white">
+				<i data-lucide="trash-2" class="w-4 h-4 text-neutral-500"></i>
+				</button>
+			</div>	
+		</div>
+		}	
+		</div>
+}

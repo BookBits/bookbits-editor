@@ -24,7 +24,7 @@ func AuthMiddleware(c fiber.Ctx) error {
 
 	user, err := models.GetUserByID(claims.UserID, state.DB)
 	if err != nil {
-		return c.SendStatus(500)
+		return c.Redirect().To("/login")
 	}
 
 	state.User = user

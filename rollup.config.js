@@ -46,4 +46,5 @@ export default [{
 			postcss(),
 			production && terser() // minify, but only in production
 		]
-	}];
+	},	
+];

@@ -1,0 +1,91 @@
+package app
+
+import "github.com/BookBits/bookbits-editor/internal/models"
+import "fmt"
+
+templ Editor(file models.ProjectFile) {
+<div class="h-full overflow-hidden flex flex-col justify-start items-center" id="page-content" x-data="editor('<p>Hello world! :-)</p>')">
+      <div class="flex flex-row w-full justify-between items-center p-2">
+	<div class="flex flex-row justify-start items-center">
+        <button hx-get={
+	fmt.Sprintf("/app/projects/%v/files", file.ProjectID)
+	} hx-select="#page-content" hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="p-2 rounded-full bg-white hover:bg-neutral-100">
+          <i data-lucide="chevron-left" class="h-5 w-5"></i>
+        </button>
+        <i data-lucide="file-text" class="h-5 w-5 ml-2"></i>
+	<h4 class="pl-2 text-lg font-medium">{ file.Name }</h4>
+	</div>
+	<div>
+	<button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
+		Save And Exit Edit
+	</button>
+	<button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
+		Save and Continue Edit
+	</button>
+	</div>
+      </div>
+      <div class="editor-menu flex flex-row w-full justify-between items-center p-1 border rounded-md mt-2">
+      <div class="flex flex-row justify-start items-center">
+        <button class="menu-button"
+          @click="toggleHeading({ level: 1 })"
+          :class="{ 'is-active': isActive('heading', { level: 1 }, updatedAt) }"
+        >
+          <i data-lucide="heading-1" class="h-5 w-5"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleHeading({ level: 2 })"
+          :class="{ 'is-active': isActive('heading', { level: 2 }, updatedAt) }"
+        >
+          <i data-lucide="heading-2" class="h-5 w-5"></i>
+        </button>
+        <button class="menu-button"
+          @click="setParagraph()"
+          :class="{ 'is-active': isActive('paragraph', updatedAt) }"
+        >
+          <i data-lucide="pilcrow" class="h-5 w-5"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleBold()"
+          :class="{ 'is-active' : isActive('bold', updatedAt) }"
+        >
+          <i data-lucide="bold" class="h-4 w-4"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleItalic()"
+          :class="{ 'is-active' : isActive('italic', updatedAt) }"
+        >
+          <i data-lucide="italic" class="w-4 h-4"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleUnderline()"
+          :class="{ 'is-active' : isActive('underline', updatedAt) }"
+        >
+          <i data-lucide="underline" class="w-4 h-4"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleBulletList()"
+          :class="{ 'is-active' : isActive('bulletList', updatedAt) }"
+        >
+          <i data-lucide="list" class="w-4 h-4"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleOrderedList()"
+          :class="{ 'is-active' : isActive('orderedList', updatedAt) }"
+        >
+          <i data-lucide="list-ordered" class="w-4 h-4"></i>
+        </button>
+        <button class="menu-button"
+          @click="toggleQuote()"
+          :class="{ 'is-active' : isActive('blockquote', updatedAt) }"
+        >
+          <i data-lucide="quote" class="w-4 h-4"></i>
+        </button>
+	</div>
+	<div class="px-4">
+	<p class="text-xs text-neutral-400 italic">No Changes Saved</p>
+	</div>
+      </div>
+
+    <div x-ref="element" class="editor-container mt-4 w-full h-full overflow-hidden border border-neutral-200 py-2 px-4"></div>
+</div>
+}
