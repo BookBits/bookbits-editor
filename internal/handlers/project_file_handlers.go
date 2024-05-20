@@ -197,3 +197,20 @@ func DeleteFile(c fiber.Ctx) error {
 
 	return renderer.RenderTempl(c, app.ProjectFilesList(updatedFiles, csrfToken, state.User))
 }
+
+func EditFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	content := app.Editor(file)
+	csrfToken := csrf.TokenFromContext(c)
+	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, fmt.Sprintf("%v | BookBits Editor", file.Name), content))
+}

@@ -27,7 +27,9 @@ shareFileModal: false
         <td class="px-5 text-sm whitespace-nowrap text-right">
 	<div x-show="showOptions" class="flex flex-row w-full justify-end items-center space-x-1.5">
 		if user.Type == models.UserTypeAdmin || user.Type == models.UserTypeManager || file.EditorID == user.ID {
-		<button class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
+		<button hx-get={
+		fmt.Sprintf("/app/projects/files/%v/edit", file.ID)
+		} hx-target="#page-content" hx-swap="outerHTML" hx-select="#page-content" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-slate-200 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-slate-200">
 			<i data-lucide="pencil" class="text-slate-500 w-4 h-4"></i>
 		</button>
 		}

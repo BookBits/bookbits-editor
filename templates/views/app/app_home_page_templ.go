@@ -129,7 +129,7 @@ func AppHomePage(user models.User, csrfToken string, title string, content templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script><body x-data=\"{}\" x-init=\"\n	window.toast = function(message, options = {}){\n                let description = &#39;&#39;;\n                let type = &#39;default&#39;;\n                let position = &#39;top-center&#39;;\n                let html = &#39;&#39;;\n                if(typeof options.description != &#39;undefined&#39;) description = options.description;\n                if(typeof options.type != &#39;undefined&#39;) type = options.type;\n                if(typeof options.position != &#39;undefined&#39;) position = options.position;\n                if(typeof options.html != &#39;undefined&#39;) html = options.html;\n                \n                window.dispatchEvent(new CustomEvent(&#39;toast-show&#39;, { detail : { type: type, message: message, description: description, position : position, html: html }}));\n            }\n	\" @htmx:response-error.window=\"window.toast($event.detail.xhr.responseText, {\n                        position: &#39;top-right&#39;,\n                        type: &#39;danger&#39;\n                })\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><script src=\"/static/bundle-packages.js\" defer></script><script src=\"/static/bundle-app.js\"></script><body class=\"w-screen h-screen flex flex-col overflow-hidden\" x-data=\"{}\" x-init=\"\n	window.toast = function(message, options = {}){\n                let description = &#39;&#39;;\n                let type = &#39;default&#39;;\n                let position = &#39;top-center&#39;;\n                let html = &#39;&#39;;\n                if(typeof options.description != &#39;undefined&#39;) description = options.description;\n                if(typeof options.type != &#39;undefined&#39;) type = options.type;\n                if(typeof options.position != &#39;undefined&#39;) position = options.position;\n                if(typeof options.html != &#39;undefined&#39;) html = options.html;\n                \n                window.dispatchEvent(new CustomEvent(&#39;toast-show&#39;, { detail : { type: type, message: message, description: description, position : position, html: html }}));\n            }\n	\" @htmx:response-error.window=\"window.toast($event.detail.xhr.responseText, {\n                        position: &#39;top-right&#39;,\n                        type: &#39;danger&#39;\n                })\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -145,7 +145,7 @@ func AppHomePage(user models.User, csrfToken string, title string, content templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header><div class=\"w-screen h-full flex flex-col items-center\"><div class=\"w-[90%] max-h-full\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header><div class=\"w-full h-full flex flex-col items-center overflow-hidden\"><div class=\"w-[90%] h-full overflow-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
