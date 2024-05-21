@@ -46,21 +46,24 @@ document.addEventListener('alpine:init', () => {
       		toggleItalic() {
       		  editor.chain().toggleItalic().focus().run()
       		},
-			toggleUnderline() {
-				editor.commands.toggleUnderline()
-			},
-			toggleBulletList() {
-				editor.chain().toggleBulletList().focus().run()
-			},
-			toggleOrderedList() {
-				editor.chain().toggleOrderedList().focus().run()
-			},
-			setParagraph() {
-				editor.chain().setParagraph().focus().run()
-			},
-			toggleQuote() {
-				editor.chain().toggleBlockquote().focus().run()
-			}
+		toggleUnderline() {
+			editor.commands.toggleUnderline()
+		},
+		toggleBulletList() {
+			editor.chain().toggleBulletList().focus().run()
+		},
+		toggleOrderedList() {
+			editor.chain().toggleOrderedList().focus().run()
+		},
+		setParagraph() {
+			editor.chain().setParagraph().focus().run()
+		},
+		toggleQuote() {
+			editor.chain().toggleBlockquote().focus().run()
+		},
+		getContent() {
+			return editor.getHTML()
+		}
 		}
 	})
 })

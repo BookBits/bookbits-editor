@@ -46,3 +46,47 @@ setupSessionRefresh()
 export function logout() {
 	sessionStorage.clear()
 }
+
+export function saveFile(evt: any, content: string) {
+	evt.detail.parameters['content'] = content
+}
+
+function getCookie(cname: string) : string {
+  const name = cname + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+async function refreshFileLock(fileID: string) {
+		var url = "/app/projects/files/" + fileID + "/lock"
+		await fetch(url, {
+			method: 'POST',
+			headers: {
+				"X-CSRF-Token": await getCSRFToken()
+			}
+		}).then((res) => {
+			if (res.status === 200) {
+				setupFileLockRefresh(fileID)
+			}
+		})
+}
+
+export function setupFileLockRefresh(fileID: string) {
+	const expiresAt: string = getCookie("File-Lock-Expire")
+	const expires = Date.parse(expiresAt)
+
+	const buffer = 60 * 1000
+	const timeOut = expires - Date.now() - buffer
+
+	setTimeout(() => {refreshFileLock(fileID)}, timeOut)
+}

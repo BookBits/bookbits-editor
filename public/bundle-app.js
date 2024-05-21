@@ -123,9 +123,66 @@ var appBundle = (function (exports) {
     function logout() {
         sessionStorage.clear();
     }
+    function saveFile(evt, content) {
+        evt.detail.parameters['content'] = content;
+    }
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+    function refreshFileLock(fileID) {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, _a, _b, _c;
+            var _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        url = "/app/projects/files/" + fileID + "/lock";
+                        _a = fetch;
+                        _b = [url];
+                        _d = {
+                            method: 'POST'
+                        };
+                        _e = {};
+                        _c = "X-CSRF-Token";
+                        return [4 /*yield*/, getCSRFToken()];
+                    case 1: return [4 /*yield*/, _a.apply(void 0, _b.concat([(_d.headers = (_e[_c] = _f.sent(),
+                                _e),
+                                _d)])).then(function (res) {
+                            if (res.status === 200) {
+                                setupFileLockRefresh(fileID);
+                            }
+                        })];
+                    case 2:
+                        _f.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    function setupFileLockRefresh(fileID) {
+        var expiresAt = getCookie("File-Lock-Expire");
+        var expires = Date.parse(expiresAt);
+        var buffer = 60 * 1000;
+        var timeOut = expires - Date.now() - buffer;
+        setTimeout(function () { refreshFileLock(fileID); }, timeOut);
+    }
 
     exports.getCSRFToken = getCSRFToken;
     exports.logout = logout;
+    exports.saveFile = saveFile;
+    exports.setupFileLockRefresh = setupFileLockRefresh;
 
     return exports;
 

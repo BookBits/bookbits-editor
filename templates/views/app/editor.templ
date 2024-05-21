@@ -3,8 +3,12 @@ package app
 import "github.com/BookBits/bookbits-editor/internal/models"
 import "fmt"
 
-templ Editor(file models.ProjectFile) {
-<div class="h-full overflow-hidden flex flex-col justify-start items-center" id="page-content" x-data="editor('<p>Hello world! :-)</p>')">
+templ Editor(file models.ProjectFile, fileContents string, csrfToken string) {
+<div x-init={
+  fmt.Sprintf("appBundle.setupFileLockRefresh('%v')", file.ID)
+} class="h-full overflow-hidden flex flex-col justify-start items-center" id="page-content" x-data={
+  fmt.Sprintf("editor('%s')", fileContents)
+}>
       <div class="flex flex-row w-full justify-between items-center p-2">
 	<div class="flex flex-row justify-start items-center">
         <button hx-get={
@@ -19,7 +23,20 @@ templ Editor(file models.ProjectFile) {
 	<button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
 		Save And Exit Edit
 	</button>
-	<button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none">
+	<button hx-put={
+          fmt.Sprintf("/app/projects/files/%v/save", file.ID)
+        } hx-target="this" hx-swap="none"
+	hx-headers={
+	  fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
+	}
+        @htmx:config-request="appBundle.saveFile($event, getContent())"
+        @htmx:before-on-load="this.disabled = true;"
+        @htmx:after-on-load="
+        this.disabled = false;
+        $refs.saveStatus.innerHTML = 'Changes synced with the server';
+        window.toast('File Saved', {type: 'success', position: 'top-right'})
+        "
+        type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-400 disabled:text-neutral-700">
 		Save and Continue Edit
 	</button>
 	</div>
@@ -82,7 +99,7 @@ templ Editor(file models.ProjectFile) {
         </button>
 	</div>
 	<div class="px-4">
-	<p class="text-xs text-neutral-400 italic">No Changes Saved</p>
+	<p class="text-xs text-neutral-400 italic" x-ref="saveStatus">No Changes Saved</p>
 	</div>
       </div>
 

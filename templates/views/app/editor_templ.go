@@ -13,7 +13,7 @@ import "bytes"
 import "github.com/BookBits/bookbits-editor/internal/models"
 import "fmt"
 
-func Editor(file models.ProjectFile) templ.Component {
+func Editor(file models.ProjectFile, fileContents string, csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -26,17 +26,45 @@ func Editor(file models.ProjectFile) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-full overflow-hidden flex flex-col justify-start items-center\" id=\"page-content\" x-data=\"editor(&#39;&lt;p&gt;Hello world! :-)&lt;/p&gt;&#39;)\"><div class=\"flex flex-row w-full justify-between items-center p-2\"><div class=\"flex flex-row justify-start items-center\"><button hx-get=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-init=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("/app/projects/%v/files", file.ProjectID))
+			fmt.Sprintf("appBundle.setupFileLockRefresh('%v')", file.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 11, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 8, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"h-full overflow-hidden flex flex-col justify-start items-center\" id=\"page-content\" x-data=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("editor('%s')", fileContents))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 10, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-row w-full justify-between items-center p-2\"><div class=\"flex flex-row justify-start items-center\"><button hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/app/projects/%v/files", file.ProjectID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 15, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,16 +72,44 @@ func Editor(file models.ProjectFile) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 16, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 20, Col: 49}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4></div><div><button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline\">Save And Exit Edit</button> <button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none\">Save and Continue Edit</button></div></div><div class=\"editor-menu flex flex-row w-full justify-between items-center p-1 border rounded-md mt-2\"><div class=\"flex flex-row justify-start items-center\"><button class=\"menu-button\" @click=\"toggleHeading({ level: 1 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 1 }, updatedAt) }\"><i data-lucide=\"heading-1\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleHeading({ level: 2 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 2 }, updatedAt) }\"><i data-lucide=\"heading-2\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"setParagraph()\" :class=\"{ &#39;is-active&#39;: isActive(&#39;paragraph&#39;, updatedAt) }\"><i data-lucide=\"pilcrow\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleBold()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bold&#39;, updatedAt) }\"><i data-lucide=\"bold\" class=\"h-4 w-4\"></i></button> <button class=\"menu-button\" @click=\"toggleItalic()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;italic&#39;, updatedAt) }\"><i data-lucide=\"italic\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleUnderline()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;underline&#39;, updatedAt) }\"><i data-lucide=\"underline\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleBulletList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bulletList&#39;, updatedAt) }\"><i data-lucide=\"list\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleOrderedList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;orderedList&#39;, updatedAt) }\"><i data-lucide=\"list-ordered\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleQuote()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;blockquote&#39;, updatedAt) }\"><i data-lucide=\"quote\" class=\"w-4 h-4\"></i></button></div><div class=\"px-4\"><p class=\"text-xs text-neutral-400 italic\">No Changes Saved</p></div></div><div x-ref=\"element\" class=\"editor-container mt-4 w-full h-full overflow-hidden border border-neutral-200 py-2 px-4\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4></div><div><button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline\">Save And Exit Edit</button> <button hx-put=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/app/projects/files/%v/save", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 27, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"this\" hx-swap=\"none\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 30, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:config-request=\"appBundle.saveFile($event, getContent())\" @htmx:before-on-load=\"this.disabled = true;\" @htmx:after-on-load=\"\n        this.disabled = false;\n        $refs.saveStatus.innerHTML = &#39;Changes synced with the server&#39;;\n        window.toast(&#39;File Saved&#39;, {type: &#39;success&#39;, position: &#39;top-right&#39;})\n        \" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-400 disabled:text-neutral-700\">Save and Continue Edit</button></div></div><div class=\"editor-menu flex flex-row w-full justify-between items-center p-1 border rounded-md mt-2\"><div class=\"flex flex-row justify-start items-center\"><button class=\"menu-button\" @click=\"toggleHeading({ level: 1 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 1 }, updatedAt) }\"><i data-lucide=\"heading-1\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleHeading({ level: 2 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 2 }, updatedAt) }\"><i data-lucide=\"heading-2\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"setParagraph()\" :class=\"{ &#39;is-active&#39;: isActive(&#39;paragraph&#39;, updatedAt) }\"><i data-lucide=\"pilcrow\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleBold()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bold&#39;, updatedAt) }\"><i data-lucide=\"bold\" class=\"h-4 w-4\"></i></button> <button class=\"menu-button\" @click=\"toggleItalic()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;italic&#39;, updatedAt) }\"><i data-lucide=\"italic\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleUnderline()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;underline&#39;, updatedAt) }\"><i data-lucide=\"underline\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleBulletList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bulletList&#39;, updatedAt) }\"><i data-lucide=\"list\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleOrderedList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;orderedList&#39;, updatedAt) }\"><i data-lucide=\"list-ordered\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleQuote()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;blockquote&#39;, updatedAt) }\"><i data-lucide=\"quote\" class=\"w-4 h-4\"></i></button></div><div class=\"px-4\"><p class=\"text-xs text-neutral-400 italic\" x-ref=\"saveStatus\">No Changes Saved</p></div></div><div x-ref=\"element\" class=\"editor-container mt-4 w-full h-full overflow-hidden border border-neutral-200 py-2 px-4\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
