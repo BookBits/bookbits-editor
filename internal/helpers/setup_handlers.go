@@ -42,4 +42,8 @@ func SetupHandlers(app *fiber.App) {
 	app.Delete("/app/projects/files/:fid", handlers.DeleteFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 
 	app.Get("/app/projects/files/:fid/edit", handlers.EditFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Get("/app/projects/files/:fid/view", handlers.ViewFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Put("/app/projects/files/:fid/save", handlers.SaveFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Post("/app/projects/files/:fid/lock", handlers.RefreshLock, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+	app.Post("/app/projects/files/:fid/unlock", handlers.UnlockFile, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 }

@@ -1,8 +1,13 @@
 package models
 
 import (
+	"context"
+	"encoding/base64"
 	"fmt"
+	"time"
 
+	"github.com/go-redis/cache/v9"
+	"github.com/gofiber/fiber/v3/log"
 	"github.com/google/go-github/v61/github"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -141,4 +146,107 @@ func (pf ProjectFile) Delete(state *AppState) error {
 
 		return nil
 	})
+}
+
+func (file ProjectFile) GetContentFromGit(state *AppState) (string, error) {
+	gc := state.GitClient
+	ctx, owner, repo := gc.Context, gc.Owner, gc.Repo
+
+	brachRef := file.Project.GetRefName()
+
+	contents, _, _, err := gc.Client.Repositories.GetContents(ctx, owner, repo, file.Path, &github.RepositoryContentGetOptions{
+		Ref: *brachRef,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	decodedContent, err := base64.StdEncoding.DecodeString(*contents.Content)
+
+	return string(decodedContent), err
+}
+
+func (file ProjectFile) GetContents(state *AppState) (string, error) {
+	appCache := state.Cache
+	ctx := context.TODO()
+	cacheID := fmt.Sprintf("file-contents-%v-%v", file.ID, file.Version)
+
+	var cachedContents string
+	err := appCache.Get(ctx, cacheID, cachedContents)
+
+	if err != nil {
+		contents, err := file.GetContentFromGit(state)
+		if err != nil {
+			return "", err
+		}
+
+		appCache.Set(&cache.Item{
+			Key: cacheID,
+			Value: contents,
+			TTL: time.Hour * 24 * 7,
+		})
+
+		return contents, nil
+	}
+
+	return cachedContents, nil
+}
+
+func (file ProjectFile) Save(state *AppState, contents []byte) (uint, error) {
+	db := state.DB
+	appCache := state.Cache
+	cacheCtx := context.TODO()
+	cacheID := fmt.Sprintf("file-contents-%v-%v", file.ID, file.Version)
+	gc := state.GitClient
+	ctx, owner, repo := gc.Context, gc.Owner, gc.Repo
+
+	delErr := appCache.Delete(cacheCtx, cacheID)
+	if delErr != nil {
+		return file.Version, delErr
+	}
+
+	newVersion := file.Version + 1
+
+	if err := db.Model(&file).Update("version", newVersion).Error; err != nil {
+		return file.Version, err
+	}
+	
+	cacheID = fmt.Sprintf("file-contents-%v-%v", file.ID, newVersion)
+	cacheSaveErr := appCache.Set(&cache.Item{
+		Key: cacheID,
+		Value: string(contents),
+		TTL: time.Hour * 24 * 7,
+	})
+
+	if cacheSaveErr != nil {
+		return file.Version, cacheSaveErr
+	}
+
+	go func() {
+		for try := 1; try <= 3; try++ {
+			commitMsg := fmt.Sprintf("user %v saved changes on %v", state.User.Username, time.Now())
+			sha, shaErr := file.GetSHA(state)
+
+			if shaErr != nil {
+				continue
+			}
+
+			_, _, gitSaveErr := gc.Client.Repositories.UpdateFile(ctx, owner, repo, file.Path, &github.RepositoryContentFileOptions{
+				Message: &commitMsg,
+				Branch: &file.Project.BranchName,
+				SHA: &sha,
+				Content: contents,
+			})
+
+			if gitSaveErr == nil {
+				log.Infof("file %v(%v) saved successfully", file.ID, file.Name)
+				break
+			}
+
+			//notify admins of save sync with git failed
+		}
+	}()
+
+	return newVersion, nil
 }

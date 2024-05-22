@@ -12,8 +12,9 @@ import "bytes"
 
 import "github.com/BookBits/bookbits-editor/internal/models"
 import "fmt"
+import "github.com/google/uuid"
 
-func Editor(file models.ProjectFile) templ.Component {
+func EditorSaveAndContinueButton(fileID uuid.UUID, fileVersion uint, csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -26,34 +27,312 @@ func Editor(file models.ProjectFile) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-full overflow-hidden flex flex-col justify-start items-center\" id=\"page-content\" x-data=\"editor(&#39;&lt;p&gt;Hello world! :-)&lt;/p&gt;&#39;)\"><div class=\"flex flex-row w-full justify-between items-center p-2\"><div class=\"flex flex-row justify-start items-center\"><button hx-get=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-trigger=\"click, editor-auto-sync from:window\" hx-put=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(
-			fmt.Sprintf("/app/projects/%v/files", file.ProjectID))
+			fmt.Sprintf("/app/projects/files/%v/save", fileID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 11, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 9, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-select=\"#page-content\" hx-target=\"#page-content\" hx-swap=\"outerHTML\" hx-push-url=\"true\" @htmx:after-on-load=\"packagesBundle.loadIcons()\" class=\"p-2 rounded-full bg-white hover:bg-neutral-100\"><i data-lucide=\"chevron-left\" class=\"h-5 w-5\"></i></button> <i data-lucide=\"file-text\" class=\"h-5 w-5 ml-2\"></i><h4 class=\"pl-2 text-lg font-medium\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"this\" hx-swap=\"outerHTML\" hx-headers=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\",\"X-File-%v-Version\":\"%v\"}", csrfToken, fileID, fileVersion))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 16, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 12, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4></div><div><button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline\">Save And Exit Edit</button> <button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none\">Save and Continue Edit</button></div></div><div class=\"editor-menu flex flex-row w-full justify-between items-center p-1 border rounded-md mt-2\"><div class=\"flex flex-row justify-start items-center\"><button class=\"menu-button\" @click=\"toggleHeading({ level: 1 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 1 }, updatedAt) }\"><i data-lucide=\"heading-1\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleHeading({ level: 2 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 2 }, updatedAt) }\"><i data-lucide=\"heading-2\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"setParagraph()\" :class=\"{ &#39;is-active&#39;: isActive(&#39;paragraph&#39;, updatedAt) }\"><i data-lucide=\"pilcrow\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleBold()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bold&#39;, updatedAt) }\"><i data-lucide=\"bold\" class=\"h-4 w-4\"></i></button> <button class=\"menu-button\" @click=\"toggleItalic()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;italic&#39;, updatedAt) }\"><i data-lucide=\"italic\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleUnderline()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;underline&#39;, updatedAt) }\"><i data-lucide=\"underline\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleBulletList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bulletList&#39;, updatedAt) }\"><i data-lucide=\"list\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleOrderedList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;orderedList&#39;, updatedAt) }\"><i data-lucide=\"list-ordered\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleQuote()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;blockquote&#39;, updatedAt) }\"><i data-lucide=\"quote\" class=\"w-4 h-4\"></i></button></div><div class=\"px-4\"><p class=\"text-xs text-neutral-400 italic\">No Changes Saved</p></div></div><div x-ref=\"element\" class=\"editor-container mt-4 w-full h-full overflow-hidden border border-neutral-200 py-2 px-4\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:config-request=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("appBundle.saveFile($event, getContent(), '%v')", fileID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 15, Col: 77}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:before-on-load=\"this.disabled = true;\" @htmx:before-swap=\"\n        this.disabled = false;\n        if ($event.detail.xhr.status === 200) {\n        $refs.saveStatus.innerHTML = &#39;Changes synced with the server&#39;;\n        window.toast(&#39;File Saved&#39;, {type: &#39;success&#39;, position: &#39;top-right&#39;})\n        } else {\n        $refs.saveStatus.innerHTML = &#39;Unsaved Changes&#39;;\n        }\n        \" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-400 disabled:text-neutral-700\">Save and Continue Edit</button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func Editor(file models.ProjectFile, fileContents string, csrfToken string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div @editor-auto-save.window=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("appBundle.autoSave('%v', %v, getContent()); $refs.saveStatus.innerHTML = 'Changes Saved Locally'", file.ID, file.Version))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 34, Col: 134}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-init=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("appBundle.setupFileLockRefresh('%v'); if (appBundle.unsavedChanges('%v')) { unsavedChangesDialog = true }", file.ID, file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 36, Col: 140}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"h-full overflow-hidden flex flex-col justify-start items-center\" id=\"page-content\" x-data=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("editor('%s')", fileContents))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 38, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = unsavedChangesDialog(file.ID).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row w-full justify-between items-center p-2\"><div class=\"flex flex-row justify-start items-center\" x-data=\"{exitConfirmDialog: false, exitConfimEvent: null}\"><button hx-trigger=\"click, editor-exit from:window\" hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/app/projects/%v/files", file.ProjectID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 44, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-select=\"#page-content\" hx-target=\"#page-content\" hx-swap=\"outerHTML\" hx-push-url=\"true\" @htmx:after-on-load=\"packagesBundle.loadIcons()\" class=\"p-2 rounded-full bg-white hover:bg-neutral-100\" @htmx:before-request=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("await appBundle.unlockFile('%v', $event)", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 46, Col: 72}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:confirm.prevent=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("if (appBundle.unsavedChanges('%v')) {exitConfirmEvent=$event;exitConfirmDialog=true;} else { $event.detail.issueRequest() }", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 48, Col: 155}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><i data-lucide=\"chevron-left\" class=\"h-5 w-5\"></i></button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ExitConfirmDialog().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<i data-lucide=\"file-text\" class=\"h-5 w-5 ml-2\"></i><h4 class=\"pl-2 text-lg font-medium\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 53, Col: 49}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4></div><div><button hx-put=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("/app/projects/files/%v/save", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 57, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"this\" hx-swap=\"none\" hx-headers=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\",\"X-File-%v-Version\":\"%v\"}", csrfToken, file.ID, file.Version))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 60, Col: 106}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:config-request=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("appBundle.saveFile($event, getContent(), '%v')", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 63, Col: 78}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @htmx:before-on-load=\"this.disabled = true;\" @htmx:after-on-load=\"if ($event.detail.xhr.status === 200) {\n        window.toast(&#39;File Saved&#39;, {type: &#39;success&#39;, position: &#39;top-right&#39;})\n        window.dispatchEvent(new Event(&#39;editor-exit&#39;));\n        }\n        this.disabled = false\n        \" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline mr-2\">Save And Exit Edit</button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = EditorSaveAndContinueButton(file.ID, file.Version, csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"editor-menu flex flex-row w-full justify-between items-center p-1 border rounded-md mt-2\"><div class=\"flex flex-row justify-start items-center\"><button class=\"menu-button\" @click=\"toggleHeading({ level: 1 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 1 }, updatedAt) }\"><i data-lucide=\"heading-1\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleHeading({ level: 2 })\" :class=\"{ &#39;is-active&#39;: isActive(&#39;heading&#39;, { level: 2 }, updatedAt) }\"><i data-lucide=\"heading-2\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"setParagraph()\" :class=\"{ &#39;is-active&#39;: isActive(&#39;paragraph&#39;, updatedAt) }\"><i data-lucide=\"pilcrow\" class=\"h-5 w-5\"></i></button> <button class=\"menu-button\" @click=\"toggleBold()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bold&#39;, updatedAt) }\"><i data-lucide=\"bold\" class=\"h-4 w-4\"></i></button> <button class=\"menu-button\" @click=\"toggleItalic()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;italic&#39;, updatedAt) }\"><i data-lucide=\"italic\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleUnderline()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;underline&#39;, updatedAt) }\"><i data-lucide=\"underline\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleBulletList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;bulletList&#39;, updatedAt) }\"><i data-lucide=\"list\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleOrderedList()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;orderedList&#39;, updatedAt) }\"><i data-lucide=\"list-ordered\" class=\"w-4 h-4\"></i></button> <button class=\"menu-button\" @click=\"toggleQuote()\" :class=\"{ &#39;is-active&#39; : isActive(&#39;blockquote&#39;, updatedAt) }\"><i data-lucide=\"quote\" class=\"w-4 h-4\"></i></button></div><div class=\"px-4\"><p class=\"text-xs text-neutral-400 italic\" x-ref=\"saveStatus\">No Changes Saved</p></div></div><div class=\"flex flex-row w-full h-full justify-stretch mt-4 space-x-2 overflow-auto\"><div x-ref=\"element\" class=\"editor-container h-full overflow-hidden border border-neutral-200 py-2 px-4\" :class=\"showUnsavedChanges ? &#39;w-[50%]&#39; : &#39;w-full&#39;\"></div><template x-if=\"showUnsavedChanges\"><div class=\"file-viewer w-[50%] py-2 px-4 border border-neutral-200\" x-html=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("appBundle.getUnsavedChanges('%v')", file.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 143, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div></template></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func ExitConfirmDialog() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var17 == nil {
+			templ_7745c5c3_Var17 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"exitConfirmDialog\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"exitConfirmDialog\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"exitConfirmDialog=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"exitConfirmDialog\" x-trap.inert.noscroll=\"exitConfirmDialog\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Discard unsaved changes?</h3><button @click=\"exitConfirmDialog=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\"><div class=\"flex flex-col h-full w-full pt-2 pr-2\"><div class=\"flex flex-row w-full px-4\"><p class=\"text-sm text-neutral-500\">Looks like you haven't saved all your changes to the file. Are you sure you want to exit? Recovery of unsaved data is not gurranteed.</p></div><div class=\"flex flex-row w-full justify-end items-center mt-6 space-x-2 p-2\"><button @click=\"exitConfirmDialog=false\" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline\">No, Take me back</button> <button @click=\"exitConfirmEvent.detail.issueRequest(); exitConfirmDialog=false;\" x-ref=\"exitBtn\" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-red-600 rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-700 focus:shadow-outline focus:outline-none\">Yes, Exit Anyway</button></div></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func unsavedChangesDialog(fileID uuid.UUID) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var18 == nil {
+			templ_7745c5c3_Var18 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"unsavedChangesDialog\" class=\"fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll\" x-cloak><div x-show=\"unsavedChangesDialog\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"ease-in duration-300\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"unsavedChangesDialog=false\" class=\"absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll\"></div><div x-show=\"unsavedChangesDialog\" x-trap.inert.noscroll=\"unsavedChangesDialog\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" x-transition:enter-end=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave=\"ease-in duration-200\" x-transition:leave-start=\"opacity-100 translate-y-0 sm:scale-100\" x-transition:leave-end=\"opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95\" class=\"relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg\"><div class=\"flex items-center justify-between pb-2\"><h3 class=\"text-lg font-semibold\">Load Previously Unsaved Changes?</h3><button @click=\"unsavedChangesDialog=false\" class=\"absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50\"><i data-lucide=\"x\"></i></button></div><div class=\"relative w-auto\"><div class=\"flex flex-col h-full w-full pt-2 pr-2\"><div class=\"flex flex-row w-full px-4\"><p class=\"text-sm text-neutral-500\">There were some previously unsaved changes detected for this file on you computer. Do you want view them?</p></div><div class=\"flex flex-row w-full justify-end items-center mt-6 space-x-2 p-2\"><button @click=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(
+			fmt.Sprintf("unsavedChangesDialog=false;appBundle.discardUnsavedChanges('%v')", fileID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/editor.templ`, Line: 226, Col: 103}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-ref=\"exitBtn\" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-red-600 rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-700 focus:shadow-outline focus:outline-none\">No, Discard Them</button> <button @click=\"unsavedChangesDialog=false;showUnsavedChanges=true\" type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 rounded-md bg-neutral-950 hover:bg-neutral-900 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none\">Yes, Show Them</button></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

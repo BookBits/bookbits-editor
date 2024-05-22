@@ -1,0 +1,23 @@
+package app
+
+import ( 
+	"fmt"
+
+	"github.com/BookBits/bookbits-editor/internal/models"
+)
+
+templ Viewer(file models.ProjectFile, fileContents string) {
+<div x-data="{}" class="h-full overflow-hidden flex flex-col justify-start items-center" id="page-content">
+      <div class="flex flex-row w-full justify-start items-center p-2">
+        <button hx-trigger="click" hx-get={
+	fmt.Sprintf("/app/projects/%v/files", file.ProjectID)
+	} hx-select="#page-content" hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="p-2 rounded-full bg-white hover:bg-neutral-100">
+          <i data-lucide="chevron-left" class="h-5 w-5"></i>
+        </button>
+        <i data-lucide="file-text" class="h-5 w-5 ml-2"></i>
+	<h4 class="pl-2 text-lg font-medium">{ file.Name }</h4>
+      </div>
+	<div class="file-viewer w-full h-full py-4 px-4 border border-neutral-200" x-html={ 
+	fmt.Sprintf("'%s'", fileContents) }></div>
+</div>
+}

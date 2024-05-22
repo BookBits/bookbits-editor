@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
@@ -210,7 +211,164 @@ func EditFile(c fiber.Ctx) error {
 	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
 		return c.Status(400).SendString("Trying to modify invalid file")
 	}
-	content := app.Editor(file)
+
+	lockUserID, err := file.IsLocked(state)
+	if err != nil {
+		log.Error(err)
+		return c.Status(500).SendString("Error while trying to open file. Please try again.")
+	}
+
+	if !(lockUserID == uuid.Nil || lockUserID == state.User.ID) {
+		return c.Status(400).SendString("File is locked for editing. Please try later or use the view option.")
+	}
+
+	lock, err := file.LockFile(state)
+	
+	if err != nil {
+		log.Error(err)
+		return c.Status(500).SendString("Error while trying to open file. Please try again.")
+	}
+	
+	fileContents, err := file.GetContents(state)
+	if err != nil {
+		return c.Status(500).SendString("Unable to fetch contents for the file")
+	}
+
+	c.Cookie(&fiber.Cookie{
+		Name: "File-Lock-Expire",
+		Value: lock.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z"),
+		SessionOnly: true,
+		SameSite: "Strict",
+	})
+
 	csrfToken := csrf.TokenFromContext(c)
+	content := app.Editor(file, fileContents, csrfToken)
 	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, fmt.Sprintf("%v | BookBits Editor", file.Name), content))
+}
+
+func ViewFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to view invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to view invalid file")
+	}
+	
+	fileContents, err := file.GetContents(state)
+	if err != nil {
+		return c.Status(500).SendString("Unable to fetch contents for the file")
+	}
+	
+	csrfToken := csrf.TokenFromContext(c)
+	content := app.Viewer(file, fileContents)
+	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, fmt.Sprintf("%v | BookBits Editor", file.Name), content))
+}
+
+func RefreshLock(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	lockUserID, err := file.IsLocked(state)
+	if err != nil {
+		log.Error(err)
+		return c.Status(500).SendString("Unable to obtain lock data. Please refresh page.")
+	}
+
+	if !(lockUserID == uuid.Nil || lockUserID == state.User.ID) {
+		return c.SendStatus(401)
+	}
+
+	lock, err := file.LockFile(state)
+	if err != nil {
+		return c.Status(500).SendString("Unable to lock file. Please refresh page")
+	}
+	
+	c.Cookie(&fiber.Cookie{
+		Name: "File-Lock-Expire",
+		Value: lock.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z"),
+		SessionOnly: true,
+		SameSite: "Strict",
+	})
+
+	return c.SendStatus(200)
+}
+
+func SaveFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	fileVersion, err := strconv.Atoi(c.Get(fmt.Sprintf("X-File-%v-Version", fileID)))
+	
+	if err != nil {
+		return c.Status(400).SendString("File Version not included with save request")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	lockUserID, err := file.IsLocked(state)
+	if err != nil {
+		log.Error(err)
+		return c.Status(500).SendString("Unable to obtain lock data. Please refresh page.")
+	}
+
+	if !(lockUserID == uuid.Nil || lockUserID == state.User.ID) {
+		return c.Status(401).SendString("File lock for your session is expired. Please refresh page and try again.")
+	}
+
+	if uint(fileVersion) != file.Version {
+		return c.Status(400).SendString("File Version mismatch. Can't save as it might cause merge conflicts")
+	}
+
+	contents := c.FormValue("content")
+	newVersion, saveErr := file.Save(state, []byte(contents))
+
+	if saveErr != nil {
+		return c.Status(500).SendString("Couldn't Save the file. Try again")
+	}
+
+	csrfToken := csrf.TokenFromContext(c)
+
+	newButton := app.EditorSaveAndContinueButton(fileID, newVersion, csrfToken)
+
+	return renderer.RenderTempl(c, newButton)
+}
+
+func UnlockFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+
+	if err := file.UnlockFile(state); err != nil {
+		return c.SendStatus(500)
+	}
+	return c.SendStatus(200)
 }

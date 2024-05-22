@@ -123,9 +123,140 @@ var appBundle = (function (exports) {
     function logout() {
         sessionStorage.clear();
     }
+    function saveFile(evt, content, fileID) {
+        console.log('saving to server');
+        localStorage.removeItem("autosave:".concat(fileID));
+        evt.detail.parameters['content'] = content;
+    }
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+    function refreshFileLock(fileID) {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, _a, _b, _c;
+            var _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        url = "/app/projects/files/" + fileID + "/lock";
+                        _a = fetch;
+                        _b = [url];
+                        _d = {
+                            method: 'POST'
+                        };
+                        _e = {};
+                        _c = "X-CSRF-Token";
+                        return [4 /*yield*/, getCSRFToken()];
+                    case 1: return [4 /*yield*/, _a.apply(void 0, _b.concat([(_d.headers = (_e[_c] = _f.sent(),
+                                _e),
+                                _d)])).then(function (res) {
+                            if (res.status === 200) {
+                                setupFileLockRefresh(fileID);
+                            }
+                        })];
+                    case 2:
+                        _f.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    function setupFileLockRefresh(fileID) {
+        var _this = this;
+        var expiresAt = getCookie("File-Lock-Expire");
+        var expires = Date.parse(expiresAt);
+        var buffer = 60 * 1000;
+        var timeOut = expires - Date.now() - buffer;
+        setTimeout(function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, refreshFileLock(fileID)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        }); }); }, timeOut);
+    }
+    function autoSave(fileID, fileVersion, fileContent) {
+        var autoSaveKey = "autosave:".concat(fileID);
+        var autoSave = {
+            fileID: fileID,
+            fileVersion: fileVersion,
+            fileContent: fileContent
+        };
+        localStorage.setItem(autoSaveKey, JSON.stringify(autoSave));
+    }
+    function unsavedChanges(fileID) {
+        var changes = localStorage.getItem("autosave:".concat(fileID));
+        if (changes) {
+            return true;
+        }
+        return false;
+    }
+    function getUnsavedChanges(fileID) {
+        var _a;
+        var changes = (_a = localStorage.getItem("autosave:".concat(fileID))) !== null && _a !== void 0 ? _a : "";
+        if (changes === "") {
+            return "";
+        }
+        var changesContent = JSON.parse(changes);
+        return changesContent.fileContent;
+    }
+    function discardUnsavedChanges(fileID) {
+        localStorage.removeItem("autosave:".concat(fileID));
+    }
+    function unlockFile(fileID, event) {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, _a, _b, _c;
+            var _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        url = "/app/projects/files/" + fileID + "/unlock";
+                        _a = fetch;
+                        _b = [url];
+                        _d = {
+                            method: 'POST'
+                        };
+                        _e = {};
+                        _c = "X-CSRF-Token";
+                        return [4 /*yield*/, getCSRFToken()];
+                    case 1: return [4 /*yield*/, _a.apply(void 0, _b.concat([(_d.headers = (_e[_c] = _f.sent(),
+                                _e),
+                                _d)])).then(function (res) {
+                            if (res.status !== 200) {
+                                window.dispatchEvent(new Event("editor:unlock-error"));
+                                event.preventDefault();
+                            }
+                        })];
+                    case 2:
+                        _f.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
 
+    exports.autoSave = autoSave;
+    exports.discardUnsavedChanges = discardUnsavedChanges;
     exports.getCSRFToken = getCSRFToken;
+    exports.getUnsavedChanges = getUnsavedChanges;
     exports.logout = logout;
+    exports.saveFile = saveFile;
+    exports.setupFileLockRefresh = setupFileLockRefresh;
+    exports.unlockFile = unlockFile;
+    exports.unsavedChanges = unsavedChanges;
 
     return exports;
 

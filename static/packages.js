@@ -13,6 +13,10 @@ document.addEventListener('alpine:init', () => {
 
 		return {
 			updatedAt: Date.now(),
+			lastAutoSave: null,
+			lastAutoSync: Date.now(),
+			unsavedChangesDialog: false,
+			showUnsavedChanges: false,
 			init() {
 				const _this = this
 
@@ -24,7 +28,23 @@ document.addEventListener('alpine:init', () => {
 						_this.updatedAt = Date.now()
 					},
 					onUpdate({}) {
-						_this.updatedAt = Date.now()
+						const autoSaveBuffer = 2 * 60 * 1000
+						const autoSyncBuffer = 10 * 60 * 1000
+						const now = Date.now()
+						_this.updatedAt = now
+						if (_this.lastAutoSave) {
+						if ((now - _this.lastAutoSave) > autoSaveBuffer) {
+							window.dispatchEvent(new Event('editor-auto-save'))
+							_this.lastAutoSave = now
+						}
+						} else {
+							window.dispatchEvent(new Event('editor-auto-save'))
+							_this.lastAutoSave = now
+						}
+						if ((now - _this.lastAutoSync) > autoSyncBuffer) {
+							window.dispatchEvent(new Event('editor-auto-sync'))
+							_this.lastAutoSync = now
+						}
 					},
 					onSelectionUpdate({}) {
 						_this.updatedAt = Date.now()
@@ -46,21 +66,24 @@ document.addEventListener('alpine:init', () => {
       		toggleItalic() {
       		  editor.chain().toggleItalic().focus().run()
       		},
-			toggleUnderline() {
-				editor.commands.toggleUnderline()
-			},
-			toggleBulletList() {
-				editor.chain().toggleBulletList().focus().run()
-			},
-			toggleOrderedList() {
-				editor.chain().toggleOrderedList().focus().run()
-			},
-			setParagraph() {
-				editor.chain().setParagraph().focus().run()
-			},
-			toggleQuote() {
-				editor.chain().toggleBlockquote().focus().run()
-			}
+		toggleUnderline() {
+			editor.commands.toggleUnderline()
+		},
+		toggleBulletList() {
+			editor.chain().toggleBulletList().focus().run()
+		},
+		toggleOrderedList() {
+			editor.chain().toggleOrderedList().focus().run()
+		},
+		setParagraph() {
+			editor.chain().setParagraph().focus().run()
+		},
+		toggleQuote() {
+			editor.chain().toggleBlockquote().focus().run()
+		},
+		getContent() {
+			return editor.getHTML()
+		}
 		}
 	})
 })
