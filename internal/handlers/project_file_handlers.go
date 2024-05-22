@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/BookBits/bookbits-editor/internal/helpers/renderer"
@@ -291,17 +292,41 @@ func SaveFile(c fiber.Ctx) error {
 		return c.Status(400).SendString("Trying to modify invalid file")
 	}
 	
+	fileVersion, err := strconv.Atoi(c.Get(fmt.Sprintf("X-File-%v-Version", fileID)))
+	
+	if err != nil {
+		return c.Status(400).SendString("File Version not included with save request")
+	}
+	
 	var file models.ProjectFile
 	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
 		return c.Status(400).SendString("Trying to modify invalid file")
 	}
+	
+	lockUserID, err := file.IsLocked(state)
+	if err != nil {
+		log.Error(err)
+		return c.Status(500).SendString("Unable to obtain lock data. Please refresh page.")
+	}
+
+	if !(lockUserID == uuid.Nil || lockUserID == state.User.ID) {
+		return c.Status(401).SendString("File lock for your session is expired. Please refresh page and try again.")
+	}
+
+	if uint(fileVersion) != file.Version {
+		return c.Status(400).SendString("File Version mismatch. Can't save as it might cause merge conflicts")
+	}
 
 	contents := c.FormValue("content")
-	saveErr := file.Save(state, []byte(contents))
+	newVersion, saveErr := file.Save(state, []byte(contents))
 
 	if saveErr != nil {
 		return c.Status(500).SendString("Couldn't Save the file. Try again")
 	}
 
-	return c.SendStatus(200)
+	csrfToken := csrf.TokenFromContext(c)
+
+	newButton := app.EditorSaveAndContinueButton(fileID, newVersion, csrfToken)
+
+	return renderer.RenderTempl(c, newButton)
 }

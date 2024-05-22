@@ -172,11 +172,19 @@ var appBundle = (function (exports) {
         });
     }
     function setupFileLockRefresh(fileID) {
+        var _this = this;
         var expiresAt = getCookie("File-Lock-Expire");
         var expires = Date.parse(expiresAt);
         var buffer = 60 * 1000;
         var timeOut = expires - Date.now() - buffer;
-        setTimeout(function () { refreshFileLock(fileID); }, timeOut);
+        setTimeout(function () { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, refreshFileLock(fileID)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        }); }); }, timeOut);
     }
 
     exports.getCSRFToken = getCSRFToken;

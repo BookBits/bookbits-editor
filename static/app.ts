@@ -88,5 +88,5 @@ export function setupFileLockRefresh(fileID: string) {
 	const buffer = 60 * 1000
 	const timeOut = expires - Date.now() - buffer
 
-	setTimeout(() => {refreshFileLock(fileID)}, timeOut)
+	setTimeout(async () => {await refreshFileLock(fileID)}, timeOut)
 }

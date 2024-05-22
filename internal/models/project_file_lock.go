@@ -21,7 +21,8 @@ func (file ProjectFile) LockFile(state *AppState) (ProjectFileLock, error) {
 	user := state.User
 	lockID := fmt.Sprintf("file-lock-%v", file.ID)
 	lockTime := time.Now()
-	expiresAt := lockTime.Add(time.Minute * 15)
+	expireDuration := time.Minute * 30
+	expiresAt := lockTime.Add(expireDuration)
 
 	lock := ProjectFileLock{
 		ProjectFileID: file.ID,
@@ -33,7 +34,7 @@ func (file ProjectFile) LockFile(state *AppState) (ProjectFileLock, error) {
 	err := appCache.Set(&cache.Item{
 		Key: lockID,
 		Value: lock,
-		TTL: time.Hour,
+		TTL: expireDuration,
 	})
 
 	return lock, err

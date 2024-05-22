@@ -193,7 +193,7 @@ func (file ProjectFile) GetContents(state *AppState) (string, error) {
 	return cachedContents, nil
 }
 
-func (file ProjectFile) Save(state *AppState, contents []byte) error {
+func (file ProjectFile) Save(state *AppState, contents []byte) (uint, error) {
 	db := state.DB
 	appCache := state.Cache
 	cacheCtx := context.TODO()
@@ -203,13 +203,13 @@ func (file ProjectFile) Save(state *AppState, contents []byte) error {
 
 	delErr := appCache.Delete(cacheCtx, cacheID)
 	if delErr != nil {
-		return delErr
+		return file.Version, delErr
 	}
 
 	newVersion := file.Version + 1
 
 	if err := db.Model(&file).Update("version", newVersion).Error; err != nil {
-		return err
+		return file.Version, err
 	}
 	
 	cacheID = fmt.Sprintf("file-contents-%v-%v", file.ID, newVersion)
@@ -220,7 +220,7 @@ func (file ProjectFile) Save(state *AppState, contents []byte) error {
 	})
 
 	if cacheSaveErr != nil {
-		return cacheSaveErr
+		return file.Version, cacheSaveErr
 	}
 
 	go func() {
@@ -248,5 +248,5 @@ func (file ProjectFile) Save(state *AppState, contents []byte) error {
 		}
 	}()
 
-	return nil
+	return newVersion, nil
 }

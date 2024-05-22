@@ -2,6 +2,30 @@ package app
 
 import "github.com/BookBits/bookbits-editor/internal/models"
 import "fmt"
+import "github.com/google/uuid"
+
+templ EditorSaveAndContinueButton(fileID uuid.UUID, fileVersion uint, csrfToken string) {
+	<button hx-put={
+          fmt.Sprintf("/app/projects/files/%v/save", fileID)
+        } hx-target="this" hx-swap="outerHTML"
+	hx-headers={
+	  fmt.Sprintf("{\"X-CSRF-Token\":\"%s\",\"X-File-%v-Version\":\"%v\"}", csrfToken, fileID, fileVersion)
+	}
+        @htmx:config-request="appBundle.saveFile($event, getContent())"
+        @htmx:before-on-load="this.disabled = true;"
+        @htmx:before-swap="
+        this.disabled = false;
+        if ($event.detail.xhr.status === 200) {
+        $refs.saveStatus.innerHTML = 'Changes synced with the server';
+        window.toast('File Saved', {type: 'success', position: 'top-right'})
+        } else {
+        $refs.saveStatus.innerHTML = 'Unsaved Changes';
+        }
+        "
+        type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-400 disabled:text-neutral-700">
+		Save and Continue Edit
+	</button>
+}
 
 templ Editor(file models.ProjectFile, fileContents string, csrfToken string) {
 <div x-init={
@@ -23,22 +47,7 @@ templ Editor(file models.ProjectFile, fileContents string, csrfToken string) {
 	<button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
 		Save And Exit Edit
 	</button>
-	<button hx-put={
-          fmt.Sprintf("/app/projects/files/%v/save", file.ID)
-        } hx-target="this" hx-swap="none"
-	hx-headers={
-	  fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken)
-	}
-        @htmx:config-request="appBundle.saveFile($event, getContent())"
-        @htmx:before-on-load="this.disabled = true;"
-        @htmx:after-on-load="
-        this.disabled = false;
-        $refs.saveStatus.innerHTML = 'Changes synced with the server';
-        window.toast('File Saved', {type: 'success', position: 'top-right'})
-        "
-        type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none disabled:bg-neutral-400 disabled:text-neutral-700">
-		Save and Continue Edit
-	</button>
+        @EditorSaveAndContinueButton(file.ID, file.Version, csrfToken)
 	</div>
       </div>
       <div class="editor-menu flex flex-row w-full justify-between items-center p-1 border rounded-md mt-2">
