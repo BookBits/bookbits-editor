@@ -40,6 +40,15 @@ func (file ProjectFile) LockFile(state *AppState) (ProjectFileLock, error) {
 	return lock, err
 } 
 
+func (file ProjectFile) UnlockFile(state *AppState) error {
+	appCache := state.Cache
+	ctx := context.TODO()
+	lockID := fmt.Sprintf("file-lock-%v", file.ID)
+
+	err := appCache.Delete(ctx, lockID)
+	return err
+}
+
 func (file ProjectFile) IsLocked(state *AppState) (uuid.UUID, error) {
 	appCache := state.Cache
 	ctx := context.TODO()

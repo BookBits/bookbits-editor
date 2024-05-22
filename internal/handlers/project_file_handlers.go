@@ -330,3 +330,22 @@ func SaveFile(c fiber.Ctx) error {
 
 	return renderer.RenderTempl(c, newButton)
 }
+
+func UnlockFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to modify invalid file")
+	}
+
+	if err := file.UnlockFile(state); err != nil {
+		return c.SendStatus(500)
+	}
+	return c.SendStatus(200)
+}

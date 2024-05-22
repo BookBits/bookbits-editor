@@ -71,17 +71,17 @@ function getCookie(cname: string) : string {
 }
 
 async function refreshFileLock(fileID: string) {
-		var url = "/app/projects/files/" + fileID + "/lock"
-		await fetch(url, {
-			method: 'POST',
-			headers: {
-				"X-CSRF-Token": await getCSRFToken()
-			}
-		}).then((res) => {
-			if (res.status === 200) {
-				setupFileLockRefresh(fileID)
-			}
-		})
+	var url = "/app/projects/files/" + fileID + "/lock"
+	await fetch(url, {
+		method: 'POST',
+		headers: {
+			"X-CSRF-Token": await getCSRFToken()
+		}
+	}).then((res) => {
+		if (res.status === 200) {
+			setupFileLockRefresh(fileID)
+		}
+	})
 }
 
 export function setupFileLockRefresh(fileID: string) {
@@ -102,4 +102,41 @@ export function autoSave(fileID: string, fileVersion: number, fileContent: strin
 		fileContent
 	}
 	localStorage.setItem(autoSaveKey, JSON.stringify(autoSave))
+}
+
+export function unsavedChanges(fileID: string) : boolean {
+	const changes = localStorage.getItem(`autosave:${fileID}`)
+	if (changes) {
+		return true
+	}
+	return false
+}
+
+export function getUnsavedChanges(fileID: string) : string {
+	const changes = localStorage.getItem(`autosave:${fileID}`) ?? ""
+	if (changes === "") {
+		return ""
+	}
+	const changesContent: FileAutoSave = JSON.parse(changes)
+	return changesContent.fileContent
+}
+
+export function discardUnsavedChanges(fileID: string) {
+	localStorage.removeItem(`autosave:${fileID}`)
+}
+
+export async function unlockFile(fileID: string, event: Event) {
+	var url = "/app/projects/files/" + fileID + "/unlock"
+	await fetch(url, {
+		method: 'POST',
+		headers: {
+			"X-CSRF-Token": await getCSRFToken()
+		}
+	}).then((res) => {
+		if (res.status !== 200) {
+			window.dispatchEvent(new Event("editor:unlock-error"))
+			event.preventDefault()
+		}
+	})
+
 }

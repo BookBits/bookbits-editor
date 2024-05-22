@@ -13,8 +13,10 @@ document.addEventListener('alpine:init', () => {
 
 		return {
 			updatedAt: Date.now(),
-			lastAutoSave: Date.now(),
+			lastAutoSave: null,
 			lastAutoSync: Date.now(),
+			unsavedChangesDialog: false,
+			showUnsavedChanges: false,
 			init() {
 				const _this = this
 
@@ -30,7 +32,12 @@ document.addEventListener('alpine:init', () => {
 						const autoSyncBuffer = 10 * 60 * 1000
 						const now = Date.now()
 						_this.updatedAt = now
+						if (_this.lastAutoSave) {
 						if ((now - _this.lastAutoSave) > autoSaveBuffer) {
+							window.dispatchEvent(new Event('editor-auto-save'))
+							_this.lastAutoSave = now
+						}
+						} else {
 							window.dispatchEvent(new Event('editor-auto-save'))
 							_this.lastAutoSave = now
 						}

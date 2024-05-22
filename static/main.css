@@ -39,4 +39,37 @@
 			@apply pl-4 border-l border-l-4 border-neutral-300
 		}
 	}
+
+	.file-viewer {
+		font-family: Georgia, serif;
+		@apply outline-none h-full max-h-[100%] overflow-auto;
+
+		h1 {
+			@apply text-2xl;
+		}
+
+		h2 {
+			@apply text-xl;
+		}
+
+		ul {
+			@apply list-disc
+		}
+
+		ol {
+			@apply list-decimal
+		}
+
+		ol, ul {
+			@apply pl-4
+		}
+
+		blockquote {
+			@apply pl-4 border-l border-l-4 border-neutral-300
+		}
+
+		p {
+			@apply mb-6
+		}
+	}
 }

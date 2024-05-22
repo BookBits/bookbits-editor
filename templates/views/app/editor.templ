@@ -33,22 +33,43 @@ templ Editor(file models.ProjectFile, fileContents string, csrfToken string) {
 <div @editor-auto-save.window={
 fmt.Sprintf("appBundle.autoSave('%v', %v, getContent()); $refs.saveStatus.innerHTML = 'Changes Saved Locally'", file.ID, file.Version)
 } x-init={
-  fmt.Sprintf("appBundle.setupFileLockRefresh('%v')", file.ID)
+  fmt.Sprintf("appBundle.setupFileLockRefresh('%v'); if (appBundle.unsavedChanges('%v')) { unsavedChangesDialog = true }", file.ID, file.ID)
 } class="h-full overflow-hidden flex flex-col justify-start items-center" id="page-content" x-data={
   fmt.Sprintf("editor('%s')", fileContents)
 }>
+      @unsavedChangesDialog(file.ID)
       <div class="flex flex-row w-full justify-between items-center p-2">
-	<div class="flex flex-row justify-start items-center">
-        <button hx-get={
+	<div class="flex flex-row justify-start items-center" x-data="{exitConfirmDialog: false, exitConfimEvent: null}">
+        <button hx-trigger="click, editor-exit from:window" hx-get={
 	fmt.Sprintf("/app/projects/%v/files", file.ProjectID)
-	} hx-select="#page-content" hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="p-2 rounded-full bg-white hover:bg-neutral-100">
+	} hx-select="#page-content" hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true" @htmx:after-on-load="packagesBundle.loadIcons()" class="p-2 rounded-full bg-white hover:bg-neutral-100" @htmx:before-request={
+        fmt.Sprintf("await appBundle.unlockFile('%v', $event)", file.ID)
+        } @htmx:confirm.prevent={
+        fmt.Sprintf("if (appBundle.unsavedChanges('%v')) {exitConfirmEvent=$event;exitConfirmDialog=true;} else { $event.detail.issueRequest() }", file.ID)}>
           <i data-lucide="chevron-left" class="h-5 w-5"></i>
         </button>
+        @ExitConfirmDialog()
         <i data-lucide="file-text" class="h-5 w-5 ml-2"></i>
 	<h4 class="pl-2 text-lg font-medium">{ file.Name }</h4>
 	</div>
 	<div>
-	<button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
+	<button hx-put={
+          fmt.Sprintf("/app/projects/files/%v/save", file.ID)
+        } hx-target="this" hx-swap="none"
+	hx-headers={
+	  fmt.Sprintf("{\"X-CSRF-Token\":\"%s\",\"X-File-%v-Version\":\"%v\"}", csrfToken, file.ID, file.Version)
+	}
+        @htmx:config-request={
+        fmt.Sprintf("appBundle.saveFile($event, getContent(), '%v')", file.ID)
+        }
+        @htmx:before-on-load="this.disabled = true;"
+        @htmx:after-on-load="if ($event.detail.xhr.status === 200) {
+        window.toast('File Saved', {type: 'success', position: 'top-right'})
+        window.dispatchEvent(new Event('editor-exit'));
+        }
+        this.disabled = false
+        "
+type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline mr-2">
 		Save And Exit Edit
 	</button>
         @EditorSaveAndContinueButton(file.ID, file.Version, csrfToken)
@@ -115,7 +136,103 @@ fmt.Sprintf("appBundle.autoSave('%v', %v, getContent()); $refs.saveStatus.innerH
 	<p class="text-xs text-neutral-400 italic" x-ref="saveStatus">No Changes Saved</p>
 	</div>
       </div>
-
-    <div x-ref="element" class="editor-container mt-4 w-full h-full overflow-hidden border border-neutral-200 py-2 px-4"></div>
+    <div class="flex flex-row w-full h-full justify-stretch mt-4 space-x-2 overflow-auto">
+    <div x-ref="element" class="editor-container h-full overflow-hidden border border-neutral-200 py-2 px-4" :class="showUnsavedChanges ? 'w-[50%]' : 'w-full'"></div>
+    <template x-if="showUnsavedChanges">
+    <div class="file-viewer w-[50%] py-2 px-4 border border-neutral-200" x-html={
+    fmt.Sprintf("appBundle.getUnsavedChanges('%v')", file.ID)
+    }></div>
+    </template>
+    </div>
 </div>
+}
+
+templ ExitConfirmDialog() {
+        <div x-show="exitConfirmDialog" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="exitConfirmDialog" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="exitConfirmDialog=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="exitConfirmDialog"
+                x-trap.inert.noscroll="exitConfirmDialog"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Discard unsaved changes?</h3>
+                    <button @click="exitConfirmDialog=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto">
+                <div class="flex flex-col h-full w-full pt-2 pr-2">
+                <div class="flex flex-row w-full px-4">
+                <p class="text-sm text-neutral-500">Looks like you haven't saved all your changes to the file. Are you sure you want to exit? Recovery of unsaved data is not gurranteed.</p>
+                </div>
+                <div class="flex flex-row w-full justify-end items-center mt-6 space-x-2 p-2">
+                <button @click="exitConfirmDialog=false" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline">
+                    No, Take me back
+                </button>
+                <button @click="exitConfirmEvent.detail.issueRequest(); exitConfirmDialog=false;" x-ref="exitBtn" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-red-600 rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-700 focus:shadow-outline focus:outline-none">
+                        Yes, Exit Anyway
+                </button>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+}
+
+templ unsavedChangesDialog(fileID uuid.UUID) {
+        <div x-show="unsavedChangesDialog" class="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen overflow-scroll" x-cloak>
+            <div x-show="unsavedChangesDialog" 
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="unsavedChangesDialog=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40 overflow-scroll"></div>
+            <div x-show="unsavedChangesDialog"
+                x-trap.inert.noscroll="unsavedChangesDialog"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative w-full py-6 bg-white px-7 sm:max-w-xl sm:rounded-lg">
+                <div class="flex items-center justify-between pb-2">
+                    <h3 class="text-lg font-semibold">Load Previously Unsaved Changes?</h3>
+                    <button @click="unsavedChangesDialog=false" class="absolute top-0 right-0 flex items-center justify-center w-8 h-8 mt-5 mr-5 text-gray-600 rounded-full hover:text-gray-800 hover:bg-gray-50">
+		    <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="relative w-auto">
+                <div class="flex flex-col h-full w-full pt-2 pr-2">
+                <div class="flex flex-row w-full px-4">
+                <p class="text-sm text-neutral-500">There were some previously unsaved changes detected for this file on you computer. Do you want view them?</p>
+                </div>
+                <div class="flex flex-row w-full justify-end items-center mt-6 space-x-2 p-2">
+                <button @click={
+                fmt.Sprintf("unsavedChangesDialog=false;appBundle.discardUnsavedChanges('%v')", fileID)
+                } x-ref="exitBtn" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-red-600 rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-700 focus:shadow-outline focus:outline-none">
+                        No, Discard Them
+                </button>
+                <button @click="unsavedChangesDialog=false;showUnsavedChanges=true" type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 rounded-md bg-neutral-950 hover:bg-neutral-900 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none">
+                    Yes, Show Them
+                </button>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
 }

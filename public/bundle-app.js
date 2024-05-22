@@ -197,12 +197,66 @@ var appBundle = (function (exports) {
         };
         localStorage.setItem(autoSaveKey, JSON.stringify(autoSave));
     }
+    function unsavedChanges(fileID) {
+        var changes = localStorage.getItem("autosave:".concat(fileID));
+        if (changes) {
+            return true;
+        }
+        return false;
+    }
+    function getUnsavedChanges(fileID) {
+        var _a;
+        var changes = (_a = localStorage.getItem("autosave:".concat(fileID))) !== null && _a !== void 0 ? _a : "";
+        if (changes === "") {
+            return "";
+        }
+        var changesContent = JSON.parse(changes);
+        return changesContent.fileContent;
+    }
+    function discardUnsavedChanges(fileID) {
+        localStorage.removeItem("autosave:".concat(fileID));
+    }
+    function unlockFile(fileID, event) {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, _a, _b, _c;
+            var _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        url = "/app/projects/files/" + fileID + "/unlock";
+                        _a = fetch;
+                        _b = [url];
+                        _d = {
+                            method: 'POST'
+                        };
+                        _e = {};
+                        _c = "X-CSRF-Token";
+                        return [4 /*yield*/, getCSRFToken()];
+                    case 1: return [4 /*yield*/, _a.apply(void 0, _b.concat([(_d.headers = (_e[_c] = _f.sent(),
+                                _e),
+                                _d)])).then(function (res) {
+                            if (res.status !== 200) {
+                                window.dispatchEvent(new Event("editor:unlock-error"));
+                                event.preventDefault();
+                            }
+                        })];
+                    case 2:
+                        _f.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
 
     exports.autoSave = autoSave;
+    exports.discardUnsavedChanges = discardUnsavedChanges;
     exports.getCSRFToken = getCSRFToken;
+    exports.getUnsavedChanges = getUnsavedChanges;
     exports.logout = logout;
     exports.saveFile = saveFile;
     exports.setupFileLockRefresh = setupFileLockRefresh;
+    exports.unlockFile = unlockFile;
+    exports.unsavedChanges = unsavedChanges;
 
     return exports;
 
