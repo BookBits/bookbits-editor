@@ -123,7 +123,9 @@ var appBundle = (function (exports) {
     function logout() {
         sessionStorage.clear();
     }
-    function saveFile(evt, content) {
+    function saveFile(evt, content, fileID) {
+        console.log('saving to server');
+        localStorage.removeItem("autosave:".concat(fileID));
         evt.detail.parameters['content'] = content;
     }
     function getCookie(cname) {
@@ -186,7 +188,17 @@ var appBundle = (function (exports) {
             }
         }); }); }, timeOut);
     }
+    function autoSave(fileID, fileVersion, fileContent) {
+        var autoSaveKey = "autosave:".concat(fileID);
+        var autoSave = {
+            fileID: fileID,
+            fileVersion: fileVersion,
+            fileContent: fileContent
+        };
+        localStorage.setItem(autoSaveKey, JSON.stringify(autoSave));
+    }
 
+    exports.autoSave = autoSave;
     exports.getCSRFToken = getCSRFToken;
     exports.logout = logout;
     exports.saveFile = saveFile;

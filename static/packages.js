@@ -13,6 +13,8 @@ document.addEventListener('alpine:init', () => {
 
 		return {
 			updatedAt: Date.now(),
+			lastAutoSave: Date.now(),
+			lastAutoSync: Date.now(),
 			init() {
 				const _this = this
 
@@ -24,7 +26,18 @@ document.addEventListener('alpine:init', () => {
 						_this.updatedAt = Date.now()
 					},
 					onUpdate({}) {
-						_this.updatedAt = Date.now()
+						const autoSaveBuffer = 2 * 60 * 1000
+						const autoSyncBuffer = 10 * 60 * 1000
+						const now = Date.now()
+						_this.updatedAt = now
+						if ((now - _this.lastAutoSave) > autoSaveBuffer) {
+							window.dispatchEvent(new Event('editor-auto-save'))
+							_this.lastAutoSave = now
+						}
+						if ((now - _this.lastAutoSync) > autoSyncBuffer) {
+							window.dispatchEvent(new Event('editor-auto-sync'))
+							_this.lastAutoSync = now
+						}
 					},
 					onSelectionUpdate({}) {
 						_this.updatedAt = Date.now()

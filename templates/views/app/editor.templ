@@ -5,13 +5,15 @@ import "fmt"
 import "github.com/google/uuid"
 
 templ EditorSaveAndContinueButton(fileID uuid.UUID, fileVersion uint, csrfToken string) {
-	<button hx-put={
+	<button hx-trigger="click, editor-auto-sync from:window" hx-put={
           fmt.Sprintf("/app/projects/files/%v/save", fileID)
         } hx-target="this" hx-swap="outerHTML"
 	hx-headers={
 	  fmt.Sprintf("{\"X-CSRF-Token\":\"%s\",\"X-File-%v-Version\":\"%v\"}", csrfToken, fileID, fileVersion)
 	}
-        @htmx:config-request="appBundle.saveFile($event, getContent())"
+        @htmx:config-request={
+        fmt.Sprintf("appBundle.saveFile($event, getContent(), '%v')", fileID)
+        }
         @htmx:before-on-load="this.disabled = true;"
         @htmx:before-swap="
         this.disabled = false;
@@ -28,7 +30,9 @@ templ EditorSaveAndContinueButton(fileID uuid.UUID, fileVersion uint, csrfToken 
 }
 
 templ Editor(file models.ProjectFile, fileContents string, csrfToken string) {
-<div x-init={
+<div @editor-auto-save.window={
+fmt.Sprintf("appBundle.autoSave('%v', %v, getContent()); $refs.saveStatus.innerHTML = 'Changes Saved Locally'", file.ID, file.Version)
+} x-init={
   fmt.Sprintf("appBundle.setupFileLockRefresh('%v')", file.ID)
 } class="h-full overflow-hidden flex flex-col justify-start items-center" id="page-content" x-data={
   fmt.Sprintf("editor('%s')", fileContents)

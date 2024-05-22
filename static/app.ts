@@ -1,3 +1,4 @@
+import { FileAutoSave } from "./types/FileAutoSave"
 import { SessionResponse } from "./types/SessionResponse"
 
 interface CsrfTokenResponse {
@@ -47,7 +48,9 @@ export function logout() {
 	sessionStorage.clear()
 }
 
-export function saveFile(evt: any, content: string) {
+export function saveFile(evt: any, content: string, fileID: string) {
+	console.log('saving to server')
+	localStorage.removeItem(`autosave:${fileID}`)
 	evt.detail.parameters['content'] = content
 }
 
@@ -89,4 +92,14 @@ export function setupFileLockRefresh(fileID: string) {
 	const timeOut = expires - Date.now() - buffer
 
 	setTimeout(async () => {await refreshFileLock(fileID)}, timeOut)
+}
+
+export function autoSave(fileID: string, fileVersion: number, fileContent: string) {
+	const autoSaveKey = `autosave:${fileID}`
+	var autoSave: FileAutoSave = {
+		fileID,
+		fileVersion,
+		fileContent
+	}
+	localStorage.setItem(autoSaveKey, JSON.stringify(autoSave))
 }
