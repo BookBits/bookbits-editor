@@ -246,6 +246,29 @@ func EditFile(c fiber.Ctx) error {
 	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, fmt.Sprintf("%v | BookBits Editor", file.Name), content))
 }
 
+func ViewFile(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	fileID, err := uuid.Parse(c.Params("fid"))
+
+	if err != nil {
+		return c.Status(400).SendString("Trying to view invalid file")
+	}
+	
+	var file models.ProjectFile
+	if err := state.DB.Preload("Editor").Preload("Reviewers").Preload("Creator").Preload("Project").First(&file, fileID).Error; err != nil {
+		return c.Status(400).SendString("Trying to view invalid file")
+	}
+	
+	fileContents, err := file.GetContents(state)
+	if err != nil {
+		return c.Status(500).SendString("Unable to fetch contents for the file")
+	}
+	
+	csrfToken := csrf.TokenFromContext(c)
+	content := app.Viewer(file, fileContents)
+	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, fmt.Sprintf("%v | BookBits Editor", file.Name), content))
+}
+
 func RefreshLock(c fiber.Ctx) error {
 	state := c.Locals("state").(*models.AppState)
 	fileID, err := uuid.Parse(c.Params("fid"))
