@@ -14,7 +14,7 @@ type Project struct {
 	gorm.Model
 
 	ID uuid.UUID `gorm:"primaryKey;type:uuid;"`
-	Name string `gorm:"unique;not null"`
+	Name string `gorm:"unique;not null;index:idx_project_name,class:FULLTEXT"`
 	DirectoryPath string `gorm:"unique;not null"`
 	BranchName string `gorm:"unique;not null"`
 
@@ -64,6 +64,45 @@ func (u User) GetProjects(db *gorm.DB) ([]Project, error) {
 		return projects, err
 	}
 	return projects, nil
+}
+
+func SearchProjects(state *AppState, keyword string) ([]Project, error) {
+	user := state.User
+	db := state.DB
+
+	var projects []Project
+
+	if user.Type == UserTypeWriter {
+		var reviewer_project_ids []uuid.UUID
+		
+		err := db.Table("project_file_reviewers").Joins("JOIN project_files ON project_file_reviewers.project_file_id=project_files.id").Where("project_file_reviewers.user_id = ?", user.ID).Select("project_id").Find(&reviewer_project_ids).Error;
+
+		if err != nil {
+			return projects, err
+		}
+		var editor_project_ids []uuid.UUID
+
+		err = db.Preload("Editor").Model(&ProjectFile{}).Where("editor_id = ?", user.ID).Select("project_id").Find(&editor_project_ids).Error
+		
+		if err != nil {
+			return projects, err
+		}
+
+		project_ids := append(reviewer_project_ids, editor_project_ids...)
+
+		if err := db.Where("id in (?)", project_ids).Where("MATCH(name) AGAINST (? IN BOOLEAN MODE) OR name LIKE ?", keyword, keyword+"%").Find(&projects).Error; err != nil {
+			return projects, err
+		}
+
+		return projects, nil
+	}
+
+	if err := db.Where("MATCH(name) AGAINST (? IN BOOLEAN MODE) OR name LIKE ?", keyword, keyword+"%").Find(&projects).Error; err != nil {
+		return projects, err
+	}
+
+	return projects, nil
+	
 }
 
 func NewProject(name string, db *gorm.DB, gc GitClient, creatorID uuid.UUID) error {

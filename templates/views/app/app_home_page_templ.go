@@ -17,7 +17,7 @@ import (
 	"github.com/BookBits/bookbits-editor/templates/components"
 )
 
-func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
+func EmptySearchResults() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -30,16 +30,184 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col w-full h-full justify-center items-center p-4\"><h3 class=\"text-md text-neutral-400\">Type Something to start searching...</h3></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func SearchResults(files []models.ProjectFile, projects []models.Project) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col w-full h-full justify-start items-start\" x-data=\"{}\" x-init=\"packagesBundle.loadIcons()\"><h5 class=\"font-semibold text-sm w-full p-2 bg-neutral-50\">Files</h5><div class=\"flex flex-col my-2 w-full px-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(files) > 0 {
+			for _, file := range files {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-trigger=\"click\" hx-get=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(
+					fmt.Sprintf("/app/projects/%v/files", file.ProjectID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 23, Col: 55}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" hx-target=\"#page-content\" hx-select=\"#page-content\" @htmx:after-on-load=\"popoverOpen=false;packagesBundle.loadIcons()\" hx-push-url=\"true\" class=\"flex flex-row space-x-1.5 p-2 items-center hover:bg-neutral-50 cursor-pointer group\"><i data-lucide=\"file-text\" class=\"w-4 h-4 text-neutral-500\"></i><p class=\"text-sm hover:underline\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(file.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 27, Col: 17}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"text-sm text-neutral-400\">No files match for current keyword. Try typing further.</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><h5 class=\"font-semibold text-sm w-full p-2 bg-neutral-50\">Projects</h5><div class=\"flex flex-col my-2 w-full px-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(projects) > 0 {
+			for _, project := range projects {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-trigger=\"click\" hx-get=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(
+					fmt.Sprintf("/app/projects/%v/files", project.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 40, Col: 51}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" hx-target=\"#page-content\" hx-select=\"#page-content\" @htmx:after-on-load=\"popoverOpen=false;packagesBundle.loadIcons()\" hx-push-url=\"true\" class=\"flex flex-row space-x-1.5 p-2 items-center hover:bg-neutral-50 cursor-pointer\"><i data-lucide=\"folder-dot\" class=\"w-4 h-4 text-neutral-500\"></i><p class=\"text-sm hover:underline\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(project.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 44, Col: 20}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"text-sm text-neutral-400\">No projects match for current keyword. Try typing further.</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func Search() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n        popoverOpen: false,\n        popoverArrow: false,\n        popoverPosition: &#39;bottom&#39;,\n        popoverHeight: 0,\n        popoverOffset: 8,\n        popoverHeightCalculate() {\n            this.$refs.popover.classList.add(&#39;invisible&#39;); \n            this.popoverOpen=true; \n            let that=this;\n            $nextTick(function(){ \n                that.popoverHeight = that.$refs.popover.offsetHeight;\n                that.popoverOpen=false; \n                that.$refs.popover.classList.remove(&#39;invisible&#39;);\n                that.$refs.popoverInner.setAttribute(&#39;x-transition&#39;, &#39;&#39;);\n                that.popoverPositionCalculate();\n            });\n        },\n        popoverPositionCalculate(){\n            if(window.innerHeight &lt; (this.$refs.popoverButton.getBoundingClientRect().top + this.$refs.popoverButton.offsetHeight + this.popoverOffset + this.popoverHeight)){\n                this.popoverPosition = &#39;top&#39;;\n            } else {\n                this.popoverPosition = &#39;bottom&#39;;\n            }\n        }\n    }\" x-init=\"\n        that = this;\n        window.addEventListener(&#39;resize&#39;, function(){\n            popoverPositionCalculate();\n        });\n        $watch(&#39;popoverOpen&#39;, function(value){\n            if(value){ popoverPositionCalculate(); document.getElementById(&#39;width&#39;).focus();  }\n        });\n    \" class=\"relative w-full\"><div class=\"w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input value=\"\" x-ref=\"popoverButton\" @click=\"popoverOpen=true\" name=\"keyword\" hx-get=\"/app/search\" hx-trigger=\"input changed delay:500ms\" hx-target=\"#search-results\" hx-swap=\"innerHTML\" @after-on-load=\"\" type=\"text\" placeholder=\"Search\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div><div x-ref=\"popover\" x-show=\"popoverOpen\" x-init=\"setTimeout(function(){ popoverHeightCalculate(); }, 100);\" x-trap.inert=\"popoverOpen\" @click.away=\"popoverOpen=false;\" @keydown.escape.window=\"popoverOpen=false\" :class=\"{ &#39;top-0 mt-12&#39; : popoverPosition == &#39;bottom&#39;, &#39;bottom-0 mb-12&#39; : popoverPosition == &#39;top&#39; }\" class=\"absolute w-full max-w-lg -translate-x-1/2 left-1/2\" x-cloak><div x-ref=\"popoverInner\" x-show=\"popoverOpen\" class=\"w-full bg-white border rounded-md shadow-sm border-neutral-200/70\"><div x-show=\"popoverArrow &amp;&amp; popoverPosition == &#39;bottom&#39;\" class=\"absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2\"><div class=\"w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-sm\"></div></div><div x-show=\"popoverArrow  &amp;&amp; popoverPosition == &#39;top&#39;\" class=\"absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2\"><div class=\"w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-sm\"></div></div><div id=\"search-results\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = EmptySearchResults().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n        dropdownOpen: false,\n	modalOpen: false,\n	changePasswordModal: false\n    }\" class=\"relative\"><button @click=\"dropdownOpen=true\" class=\"inline-flex items-center justify-center h-12 py-2 pl-3 pr-12 text-sm font-medium transition-colors bg-white border rounded-md text-neutral-700 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none disabled:opacity-50 disabled:pointer-events-none\"><span class=\"flex flex-col items-start flex-shrink-0 h-full ml-2 leading-none translate-y-px\"><span>Welcome, ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 20, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 127, Col: 41}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,12 +215,12 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 21, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 128, Col: 73}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -82,13 +250,13 @@ func UserDropdownMenu(user models.User, csrfToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(
 			fmt.Sprintf("{\"X-CSRF-Token\":\"%s\"}", csrfToken))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 50, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 157, Col: 55}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -111,21 +279,21 @@ func AppHomePage(user models.User, csrfToken string, title string, content templ
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 65, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/views/app/app_home_page.templ`, Line: 172, Col: 15}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -137,7 +305,15 @@ func AppHomePage(user models.User, csrfToken string, title string, content templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen\"><div class=\"flex items-center ml-4\"><a href=\"/app\" class=\"text-lg font-bold\"><span class=\"text-blue-600\">BookBits</span> Editor</a></div><div class=\"flex items-center w-[30%]\"><div class=\"w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group\"><i data-lucide=\"search\" class=\"w-4 h-4 text-neutral-500\"></i> <input type=\"text\" placeholder=\"Search\" class=\"flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50\"></div></div><div class=\"flex items-center mr-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-white border-b-1 border border-b-neutral-200/70 text-neutral-700 py-2 flex justify-between items-center w-screen\"><div class=\"flex items-center ml-4\"><a href=\"/app\" class=\"text-lg font-bold\"><span class=\"text-blue-600\">BookBits</span> Editor</a></div><div class=\"flex items-center w-[30%]\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = Search().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"flex items-center mr-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

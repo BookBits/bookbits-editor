@@ -18,7 +18,7 @@ type ProjectFile struct {
 	gorm.Model
 
 	ID uuid.UUID `gorm:"primaryKey;type:uuid"`
-	Name string `gorm:"not null"`
+	Name string `gorm:"not null;index:idx_project_file_name,class:FULLTEXT"`
 	Path string `gorm:"not null"`
 	Version uint `gorm:"not null;default:1"`
 
@@ -59,6 +59,43 @@ func (p Project) GetFiles(db *gorm.DB, u User) ([]ProjectFile, error) {
 	}
 
 	if err := db.Where("project_id = ?", p.ID).Preload("Creator").Preload("Editor").Preload("Reviewers").Find(&files).Error; err != nil {
+		return files, err
+	}
+
+	return files, nil
+}
+
+func SearchFiles(state *AppState, keyword string) ([]ProjectFile, error) {
+	user := state.User
+	db := state.DB
+
+	var files []ProjectFile
+
+	if user.Type == UserTypeWriter {
+		var reviewerFileIDs []uuid.UUID
+		
+		err := db.Unscoped().Table("project_file_reviewers").Joins("JOIN project_files ON project_file_reviewers.project_file_id=project_files.id").Where("project_file_reviewers.user_id = ?", user.ID).Select("project_files.id").Find(&reviewerFileIDs).Error;
+
+		if err != nil {
+			return files, err
+		}
+
+		var editorFileIDs []uuid.UUID
+
+		if err := db.Model(&ProjectFile{}).Where("editor_id = ?", user.ID).Select("id").Find(&editorFileIDs).Error; err != nil {
+			return files, err
+		}
+		
+		fileIDs := append(reviewerFileIDs, editorFileIDs...)
+
+		if err := db.Preload("Project").Model(&ProjectFile{}).Where("id IN (?)", fileIDs).Where("MATCH(name) AGAINST (? IN BOOLEAN MODE) OR name like ?", keyword, keyword+"%").Find(&files).Error; err != nil {
+			return files, err
+		}
+
+		return files, nil
+	}
+	
+	if err := db.Preload("Project").Model(&ProjectFile{}).Where("MATCH(name) AGAINST (? IN BOOLEAN MODE) OR name LIKE ?", keyword, keyword+"%").Find(&files).Error; err != nil {
 		return files, err
 	}
 

@@ -21,3 +21,26 @@ func AppHomeHandler(c fiber.Ctx) error {
 	content := app.ProjectsSection(csrfToken, state.User, projects)
 	return renderer.RenderTempl(c, app.AppHomePage(state.User, csrfToken, "Dashboard | Bookbits Editor", content))
 }
+
+func Search(c fiber.Ctx) error {
+	state := c.Locals("state").(*models.AppState)
+	keyword := c.FormValue("keyword")
+
+	if keyword == "" {
+		return renderer.RenderTempl(c, app.EmptySearchResults())
+	}
+
+	files, err := models.SearchFiles(state, keyword)
+
+	if err != nil {
+		return c.Status(500).SendString("Unable to perform search")
+	}
+
+	projects, err := models.SearchProjects(state, keyword)
+	
+	if err != nil {
+		return c.Status(500).SendString("Unable to perform search")
+	}
+
+	return renderer.RenderTempl(c, app.SearchResults(files, projects))
+}

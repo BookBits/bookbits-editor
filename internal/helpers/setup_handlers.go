@@ -28,6 +28,8 @@ func SetupHandlers(app *fiber.App) {
 	app.Patch("/users/password", handlers.ChangePassword, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
 	app.Patch("/users/:uid/password", handlers.ChangePasswordRandom, middlewares.AuthMiddleware, middlewares.AdminOnlyRoute)
 
+	app.Get("/app/search", handlers.Search, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)
+
 	app.Get("/app/projects", func(c fiber.Ctx) error {
 		return c.Redirect().To("/app")
 		}, middlewares.AuthMiddleware, middlewares.AuthOnlyRoute)

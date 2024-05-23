@@ -7,6 +7,113 @@ import (
 	"github.com/BookBits/bookbits-editor/templates/components"
 )
 
+templ EmptySearchResults() {
+	<div class="flex flex-col w-full h-full justify-center items-center p-4">
+		<h3 class="text-md text-neutral-400">Type Something to start searching...</h3>
+	</div>
+}
+
+templ SearchResults(files []models.ProjectFile, projects []models.Project) {
+	<div class="flex flex-col w-full h-full justify-start items-start" x-data="{}" x-init="packagesBundle.loadIcons()">
+	<h5 class="font-semibold text-sm w-full p-2 bg-neutral-50">Files</h5>
+	<div class="flex flex-col my-2 w-full px-2">
+	if len(files) > 0 {
+	for _, file := range files {
+		<div hx-trigger="click" hx-get={
+		fmt.Sprintf("/app/projects/%v/files", file.ProjectID)
+		} hx-swap="outerHTML" hx-target="#page-content" hx-select="#page-content" @htmx:after-on-load="popoverOpen=false;packagesBundle.loadIcons()" hx-push-url="true" class="flex flex-row space-x-1.5 p-2 items-center hover:bg-neutral-50 cursor-pointer group">
+		<i data-lucide="file-text" class="w-4 h-4 text-neutral-500"></i>
+		<p class="text-sm hover:underline">
+		    { file.Name }
+		</p>
+		</div>
+	}
+	} else {
+		<p class="text-sm text-neutral-400">No files match for current keyword. Try typing further.</p>
+	}
+	</div>
+	<h5 class="font-semibold text-sm w-full p-2 bg-neutral-50">Projects</h5>
+	<div class="flex flex-col my-2 w-full px-2">
+	if len(projects) > 0 {
+	for _, project := range projects {
+		<div hx-trigger="click" hx-get={
+		fmt.Sprintf("/app/projects/%v/files", project.ID)
+		} hx-swap="outerHTML" hx-target="#page-content" hx-select="#page-content" @htmx:after-on-load="popoverOpen=false;packagesBundle.loadIcons()" hx-push-url="true" class="flex flex-row space-x-1.5 p-2 items-center hover:bg-neutral-50 cursor-pointer">
+		<i data-lucide="folder-dot" class="w-4 h-4 text-neutral-500"></i>
+		<p class="text-sm hover:underline">
+		    { project.Name }
+		</p>
+		</div>
+	}
+	} else {
+	<p class="text-sm text-neutral-400">No projects match for current keyword. Try typing further.</p>
+	}
+	</div>
+	</div>
+}
+
+templ Search() {
+<div x-data="{
+        popoverOpen: false,
+        popoverArrow: false,
+        popoverPosition: 'bottom',
+        popoverHeight: 0,
+        popoverOffset: 8,
+        popoverHeightCalculate() {
+            this.$refs.popover.classList.add('invisible'); 
+            this.popoverOpen=true; 
+            let that=this;
+            $nextTick(function(){ 
+                that.popoverHeight = that.$refs.popover.offsetHeight;
+                that.popoverOpen=false; 
+                that.$refs.popover.classList.remove('invisible');
+                that.$refs.popoverInner.setAttribute('x-transition', '');
+                that.popoverPositionCalculate();
+            });
+        },
+        popoverPositionCalculate(){
+            if(window.innerHeight < (this.$refs.popoverButton.getBoundingClientRect().top + this.$refs.popoverButton.offsetHeight + this.popoverOffset + this.popoverHeight)){
+                this.popoverPosition = 'top';
+            } else {
+                this.popoverPosition = 'bottom';
+            }
+        }
+    }"
+    x-init="
+        that = this;
+        window.addEventListener('resize', function(){
+            popoverPositionCalculate();
+        });
+        $watch('popoverOpen', function(value){
+            if(value){ popoverPositionCalculate(); document.getElementById('width').focus();  }
+        });
+    "
+    class="relative w-full">
+    
+	<div class="w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group">
+		<i data-lucide="search" class="w-4 h-4 text-neutral-500"></i>
+		<input value="" x-ref="popoverButton" @click="popoverOpen=true" name="keyword" hx-get="/app/search" hx-trigger="input changed delay:500ms" hx-target="#search-results" hx-swap="innerHTML" @after-on-load="" type="text" placeholder="Search" class="flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50" />
+	</div>
+
+    <div x-ref="popover"
+        x-show="popoverOpen"
+        x-init="setTimeout(function(){ popoverHeightCalculate(); }, 100);"
+        x-trap.inert="popoverOpen"
+        @click.away="popoverOpen=false;"
+        @keydown.escape.window="popoverOpen=false"
+        :class="{ 'top-0 mt-12' : popoverPosition == 'bottom', 'bottom-0 mb-12' : popoverPosition == 'top' }"
+        class="absolute w-full max-w-lg -translate-x-1/2 left-1/2" x-cloak>
+        <div x-ref="popoverInner" x-show="popoverOpen" class="w-full bg-white border rounded-md shadow-sm border-neutral-200/70">
+            <div x-show="popoverArrow && popoverPosition == 'bottom'" class="absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-sm"></div></div>
+            <div x-show="popoverArrow  && popoverPosition == 'top'" class="absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-sm"></div></div>
+            <div id="search-results">
+	    @EmptySearchResults()
+            </div>
+        </div>
+    </div>
+</div>
+}
+
 templ UserDropdownMenu(user models.User, csrfToken string) {
 <div x-data="{
         dropdownOpen: false,
@@ -92,10 +199,7 @@ templ AppHomePage(user models.User, csrfToken string, title string, content temp
 		    <a href="/app" class="text-lg font-bold"><span class="text-blue-600">BookBits</span> Editor</a>
 		  </div>
 		  <div class="flex items-center w-[30%]">
-			<div class="w-full mx-auto flex flex-row items-center justify-center border rounded-md border-neutral-300 ring-offset-background focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-neutral-400 px-4 group">
-				<i data-lucide="search" class="w-4 h-4 text-neutral-500"></i>
-			    <input type="text" placeholder="Search" class="flex focus:outline-none w-full h-10 px-3 py-2 text-sm bg-white placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50" />
-			</div>
+			@Search()
 		  </div>
 		  <div class="flex items-center mr-4">
 			@UserDropdownMenu(user, csrfToken)
